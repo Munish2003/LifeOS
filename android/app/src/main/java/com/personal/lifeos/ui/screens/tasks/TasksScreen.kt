@@ -36,6 +36,7 @@ fun TasksScreen(
     val state by homeViewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     var showAddDialog by remember { mutableStateOf(false) }
+    var currentFilter by remember { mutableStateOf("all") }
 
     Scaffold(
         topBar = {
@@ -69,13 +70,32 @@ fun TasksScreen(
         },
         containerColor = SkyBackground
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            TaskFilterTabs(
+                currentFilter = currentFilter,
+                onFilterSelected = { currentFilter = it },
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+            )
+            
+            val filteredTasks = state.tasks.filter { task ->
+                when (currentFilter) {
+                    "P1" -> task.priority == 1
+                    "P2" -> task.priority == 2
+                    "P3" -> task.priority == 3
+                    else -> true
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -98,7 +118,7 @@ fun TasksScreen(
                 }
             }
 
-            items(state.tasks, key = { it.id }) { task ->
+            items(filteredTasks, key = { it.id }) { task ->
                 SkyTaskCard(
                     task = task,
                     onToggleComplete = {
@@ -152,6 +172,60 @@ fun TasksScreen(
                 }
             )
         }
+        }
+    }
+}
+
+@Composable
+fun TaskFilterTabs(currentFilter: String, onFilterSelected: (String) -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterChip(
+            selected = currentFilter == "all",
+            onClick = { onFilterSelected("all") },
+            label = { Text("📋 All") },
+            colors = FilterChipDefaults.filterChipColors(
+                containerColor = PureWhite,
+                selectedContainerColor = SkyBlueSurface,
+                selectedLabelColor = SkyBluePrimary
+            ),
+            border = FilterChipDefaults.filterChipBorder(enabled = true, selected = currentFilter == "all", borderColor = CardBorderLight)
+        )
+        FilterChip(
+            selected = currentFilter == "P1",
+            onClick = { onFilterSelected("P1") },
+            label = { Text("🔥 P1") },
+            colors = FilterChipDefaults.filterChipColors(
+                containerColor = PureWhite,
+                selectedContainerColor = RoseError.copy(alpha=0.15f),
+                selectedLabelColor = RoseError
+            ),
+            border = FilterChipDefaults.filterChipBorder(enabled = true, selected = currentFilter == "P1", borderColor = CardBorderLight)
+        )
+        FilterChip(
+            selected = currentFilter == "P2",
+            onClick = { onFilterSelected("P2") },
+            label = { Text("⚡ P2") },
+            colors = FilterChipDefaults.filterChipColors(
+                containerColor = PureWhite,
+                selectedContainerColor = AmberWarning.copy(alpha=0.15f),
+                selectedLabelColor = AmberWarning
+            ),
+            border = FilterChipDefaults.filterChipBorder(enabled = true, selected = currentFilter == "P2", borderColor = CardBorderLight)
+        )
+        FilterChip(
+            selected = currentFilter == "P3",
+            onClick = { onFilterSelected("P3") },
+            label = { Text("📌 P3") },
+            colors = FilterChipDefaults.filterChipColors(
+                containerColor = PureWhite,
+                selectedContainerColor = SkyBlueSurface,
+                selectedLabelColor = SkyBluePrimary
+            ),
+            border = FilterChipDefaults.filterChipBorder(enabled = true, selected = currentFilter == "P3", borderColor = CardBorderLight)
+        )
     }
 }
 

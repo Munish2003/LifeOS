@@ -368,6 +368,18 @@ fun HomeDashboardScreen(
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+            
+            RoutineTimelineDiagram()
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            ConsistencyHabitMatrix()
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            QuickPriorityTasks()
+            
+            Spacer(modifier = Modifier.height(32.dp))
         }
 
         // Settings Dialog for custom Server IP and Hugging Face API key

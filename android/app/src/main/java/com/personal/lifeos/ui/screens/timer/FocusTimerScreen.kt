@@ -56,9 +56,12 @@ fun FocusTimerScreen(
         }
     }
 
-    val hours = elapsedSeconds / 3600
-    val minutes = (elapsedSeconds % 3600) / 60
-    val seconds = elapsedSeconds % 60
+    var targetMinutes by remember { mutableStateOf(25) }
+    val remainingSeconds = maxOf(0, targetMinutes * 60 - elapsedSeconds)
+
+    val hours = remainingSeconds / 3600
+    val minutes = (remainingSeconds % 3600) / 60
+    val seconds = remainingSeconds % 60
     val timeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds)
 
     // Continuous Infinite Breathing Wave when timer is running
@@ -133,8 +136,9 @@ fun FocusTimerScreen(
                         color = SkyBlueSurface,
                         style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round)
                     )
-                    if (isRunning) {
-                        val sweep = ((elapsedSeconds % 60) / 60f) * 360f
+                    if (isRunning || elapsedSeconds > 0) {
+                        val totalSeconds = targetMinutes * 60
+                        val sweep = (elapsedSeconds.toFloat() / totalSeconds.toFloat()).coerceIn(0f, 1f) * 360f
                         drawArc(
                             brush = Brush.sweepGradient(listOf(SkyBluePrimary, CyanAccent, SkyBlueLight)),
                             startAngle = -90f,
@@ -162,6 +166,32 @@ fun FocusTimerScreen(
                     )
                 }
             }
+
+            // Presets and Meta
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    PresetButton("25m", targetMinutes == 25) { targetMinutes = 25 }
+                    PresetButton("45m", targetMinutes == 45) { targetMinutes = 45 }
+                    PresetButton("60m", targetMinutes == 60) { targetMinutes = 60 }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Computer, contentDescription = null, tint = SkyBluePrimary, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Deep Work", style = MaterialTheme.typography.labelSmall, color = TextDarkPrimary)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("•", color = TextMuted)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Default.Headphones, contentDescription = null, tint = SkyBluePrimary, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Focus Chamber Active", style = MaterialTheme.typography.labelSmall, color = TextDarkPrimary)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Control Buttons
             Row(
@@ -232,5 +262,22 @@ fun FocusTimerScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PresetButton(label: String, isSelected: Boolean, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = if (isSelected) SkyBluePrimary else PureWhite,
+        border = if (!isSelected) CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, Color.Transparent))) else null,
+        onClick = onClick
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isSelected) PureWhite else TextDarkPrimary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
     }
 }
