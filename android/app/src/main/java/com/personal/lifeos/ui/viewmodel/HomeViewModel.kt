@@ -11,6 +11,7 @@ import com.personal.lifeos.data.local.entity.TaskEntity
 import com.personal.lifeos.data.repository.LifeOsRepository
 import com.personal.lifeos.domain.engine.LocalAvailabilityEngine
 import com.personal.lifeos.domain.engine.LocalAvailabilityResult
+import com.personal.lifeos.service.GoogleFitManager
 import com.personal.lifeos.service.StepSensorManager
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -33,6 +34,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val repository = LifeOsRepository(database)
     private val availabilityEngine = LocalAvailabilityEngine()
     val stepSensorManager = StepSensorManager(application)
+    val googleFitManager = GoogleFitManager(application)
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -41,6 +43,33 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         stepSensorManager.startListening()
         loadData()
         listenToHardwareSteps()
+        if (googleFitManager.isConnected() && googleFitManager.isAutoSync()) {
+            syncGoogleFit()
+        }
+    }
+
+    fun syncGoogleFit(onResult: (Boolean, String) -> Unit = { _, _ -> }) {
+        viewModelScope.launch {
+            try {
+                if (!googleFitManager.isHealthConnectAvailable()) {
+                    onResult(false, "Health Connect service not available on this device.")
+                    return@launch
+                }
+                val hasPerms = googleFitManager.hasPermissions()
+                if (!hasPerms) {
+                    onResult(false, "Permissions not granted yet. Tap 'Connect Google Fit' to grant access.")
+                    return@launch
+                }
+                val fitSteps = googleFitManager.readTodaySteps()
+                if (fitSteps > 0) {
+                    repository.updateSteps(fitSteps.toInt())
+                }
+                googleFitManager.setConnected(true)
+                onResult(true, "Successfully synced ${fitSteps} steps from Google Fit!")
+            } catch (e: Exception) {
+                onResult(false, "Google Fit sync error: ${e.message}")
+            }
+        }
     }
 
     private fun listenToHardwareSteps() {

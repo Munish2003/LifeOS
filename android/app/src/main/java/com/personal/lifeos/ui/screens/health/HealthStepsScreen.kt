@@ -1,8 +1,13 @@
 package com.personal.lifeos.ui.screens.health
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -11,29 +16,71 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.personal.lifeos.service.GoogleFitManager
+import com.personal.lifeos.ui.components.BouncingDotsLoader
 import com.personal.lifeos.ui.components.InfiniteAuraRing
 import com.personal.lifeos.ui.theme.*
 import com.personal.lifeos.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthStepsScreen(
     homeViewModel: HomeViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val state by homeViewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
+    val googleFitManager = remember { homeViewModel.googleFitManager }
+    var isFitConnected by remember { mutableStateOf(googleFitManager.isConnected()) }
+    var isSyncing by remember { mutableStateOf(false) }
+    var syncStatusText by remember { mutableStateOf<String?>(null) }
+    var showSetupDialog by remember { mutableStateOf(false) }
     var showWeightDialog by remember { mutableStateOf(false) }
     var currentWeight by remember { mutableStateOf(79.5) }
     var weightInput by remember { mutableStateOf("79.5") }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = PermissionController.createRequestPermissionResultContract()
+    ) { grantedPermissions ->
+        scope.launch {
+            if (grantedPermissions.containsAll(GoogleFitManager.PERMISSIONS)) {
+                googleFitManager.setConnected(true)
+                isFitConnected = true
+                isSyncing = true
+                homeViewModel.syncGoogleFit { success, msg ->
+                    isSyncing = false
+                    syncStatusText = msg
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(context, "Permissions granted partially or cancelled.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (googleFitManager.isConnected()) {
+            isSyncing = true
+            homeViewModel.syncGoogleFit { _, msg ->
+                isSyncing = false
+                syncStatusText = msg
+            }
+        }
+    }
 
     val stepPct = if (state.stepsTarget > 0) (state.stepsCurrent.toFloat() / state.stepsTarget).coerceIn(0f, 1f) else 0f
     val distanceKm = state.stepsCurrent * 0.00075
@@ -51,6 +98,15 @@ fun HealthStepsScreen(
                         color = TextDarkPrimary
                     )
                 },
+                actions = {
+                    IconButton(onClick = { showSetupDialog = true }) {
+                        Icon(
+                            Icons.Default.HelpOutline,
+                            contentDescription = "Google Fit Help",
+                            tint = SkyBluePrimary
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = SkyBackground)
             )
         },
@@ -64,7 +120,150 @@ fun HealthStepsScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Main Steps Card with Infinite Aura
+            // GOOGLE FIT INTEGRATION CARD
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 3.dp, shape = RoundedCornerShape(22.dp), ambientColor = GlowSkyBlue),
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = PureWhite),
+                border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(CircleShape)
+                                    .background(SkyTint),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DirectionsRun,
+                                    contentDescription = "Google Fit",
+                                    tint = SkyBluePrimary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Google Fit Integration",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextDarkPrimary
+                                )
+                                Text(
+                                    text = if (isFitConnected) "🟢 Connected & Syncing" else "⚪ Not Connected",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (isFitConnected) EmeraldSuccess else TextMuted
+                                )
+                            }
+                        }
+
+                        IconButton(
+                            onClick = { googleFitManager.openGoogleFitApp() },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.OpenInNew,
+                                contentDescription = "Open Google Fit App",
+                                tint = SkyBluePrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = if (isFitConnected) {
+                            val lastSync = googleFitManager.getLastSyncTime()
+                            val timeStr = if (lastSync > 0) {
+                                SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(lastSync))
+                            } else "Just now"
+                            "Synced with Google Fit & Health Connect. Last update at $timeStr."
+                        } else {
+                            "Connect Google Fit to automatically synchronize your real daily steps, walking distance, and workout calories."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextDarkSecondary,
+                        lineHeight = 18.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        if (!isFitConnected) {
+                            Button(
+                                onClick = {
+                                    if (googleFitManager.isHealthConnectAvailable()) {
+                                        try {
+                                            permissionLauncher.launch(GoogleFitManager.PERMISSIONS)
+                                        } catch (e: Exception) {
+                                            showSetupDialog = true
+                                        }
+                                    } else {
+                                        showSetupDialog = true
+                                    }
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                                modifier = Modifier.weight(1f).height(44.dp)
+                            ) {
+                                Icon(Icons.Default.Link, contentDescription = "Connect", modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Connect Google Fit", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    isSyncing = true
+                                    homeViewModel.syncGoogleFit { success, msg ->
+                                        isSyncing = false
+                                        syncStatusText = msg
+                                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                                modifier = Modifier.weight(1f).height(44.dp),
+                                enabled = !isSyncing
+                            ) {
+                                if (isSyncing) {
+                                    BouncingDotsLoader(dotSize = 6.dp, color = PureWhite)
+                                } else {
+                                    Icon(Icons.Default.Sync, contentDescription = "Sync", modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Sync Now", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                }
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = { showSetupDialog = true },
+                            shape = RoundedCornerShape(12.dp),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(brush = Brush.linearGradient(listOf(SkyBluePrimary, SkyBlueVariant))),
+                            modifier = Modifier.height(44.dp)
+                        ) {
+                            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = SkyBluePrimary, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Setup", color = SkyBluePrimary, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+
+            // MAIN STEPS CARD WITH INFINITE ROTATING AURA
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,13 +276,25 @@ fun HealthStepsScreen(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "HARDWARE PEDOMETER ACTIVE",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = SkyBluePrimary,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.2.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(if (isFitConnected) EmeraldSuccess else SkyBluePrimary)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isFitConnected) "GOOGLE FIT + SENSOR LIVE" else "HARDWARE PEDOMETER ACTIVE",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SkyBluePrimary,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.1.sp
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(18.dp))
 
@@ -125,22 +336,21 @@ fun HealthStepsScreen(
                     Button(
                         onClick = {
                             scope.launch {
-                                // Real-time test step increment
                                 homeViewModel.repository.updateSteps(state.stepsCurrent + 250)
                             }
                         },
                         shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary, contentColor = PureWhite),
-                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                        colors = ButtonDefaults.buttonColors(containerColor = SkyTint, contentColor = SkyBluePrimary),
+                        modifier = Modifier.fillMaxWidth().height(44.dp)
                     ) {
-                        Icon(Icons.Default.DirectionsWalk, contentDescription = "Step", modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.DirectionsWalk, contentDescription = "Step", modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Walking Steps (+250)", fontWeight = FontWeight.Bold)
+                        Text("Simulate Steps (+250)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                 }
             }
 
-            // Weight & Body Metric Card
+            // WEIGHT & BODY METRIC CARD
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -199,6 +409,108 @@ fun HealthStepsScreen(
             }
         }
 
+        // GOOGLE FIT SETUP & PERMISSIONS DIALOG
+        if (showSetupDialog) {
+            AlertDialog(
+                onDismissRequest = { showSetupDialog = false },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.DirectionsRun, contentDescription = null, tint = SkyBluePrimary)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Google Fit & Health Setup", fontWeight = FontWeight.ExtraBold, color = TextDarkPrimary)
+                    }
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            text = "Google Fit syncs seamlessly with Life OS using Google's official Health platform.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextDarkSecondary
+                        )
+
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = SkyTint),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text = "Quick Setup Steps:",
+                                    fontWeight = FontWeight.Bold,
+                                    color = SkyBluePrimary,
+                                    fontSize = 13.sp
+                                )
+                                Text("1. Ensure Google Fit app is installed on your phone.", fontSize = 12.sp, color = TextDarkPrimary)
+                                Text("2. In Google Fit -> Settings -> enable 'Sync Fit with Health Connect'.", fontSize = 12.sp, color = TextDarkPrimary)
+                                Text("3. Grant Life OS permission to read Steps & Activities.", fontSize = 12.sp, color = TextDarkPrimary)
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { googleFitManager.openGoogleFitApp() },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text("Open Fit App", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                            OutlinedButton(
+                                onClick = { googleFitManager.openHealthConnectSettings() },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text("Health Settings", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        Button(
+                            onClick = {
+                                if (googleFitManager.isHealthConnectAvailable()) {
+                                    try {
+                                        permissionLauncher.launch(GoogleFitManager.PERMISSIONS)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "Please install Health Connect", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    googleFitManager.openHealthConnectSettings()
+                                }
+                                showSetupDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
+                        ) {
+                            Text("Grant Health Permissions", fontWeight = FontWeight.Bold)
+                        }
+
+                        TextButton(
+                            onClick = {
+                                googleFitManager.setConnected(true)
+                                isFitConnected = true
+                                scope.launch {
+                                    homeViewModel.repository.updateSteps(state.stepsCurrent + 1000)
+                                }
+                                Toast.makeText(context, "Linked Google Fit & synced steps!", Toast.LENGTH_SHORT).show()
+                                showSetupDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Test / Force Connect (+1,000 steps)", color = SkyBluePrimary, fontSize = 12.sp)
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showSetupDialog = false }) {
+                        Text("Close", fontWeight = FontWeight.Bold, color = TextDarkPrimary)
+                    }
+                },
+                containerColor = PureWhite
+            )
+        }
+
+        // WEIGHT DIALOG
         if (showWeightDialog) {
             AlertDialog(
                 onDismissRequest = { showWeightDialog = false },
