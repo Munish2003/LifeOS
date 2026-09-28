@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -475,7 +476,7 @@ fun HealthStepsScreen(
 
         // CALIBRATE ACTUAL STEPS DIALOG
         if (showCalibrateDialog) {
-            var calibrateInput by remember { mutableStateOf(steps.toString()) }
+            var calibrateInput by remember { mutableStateOf(state.stepsCurrent.toString()) }
             androidx.compose.ui.window.Dialog(onDismissRequest = { showCalibrateDialog = false }) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -545,7 +546,7 @@ fun HealthStepsScreen(
 
                         Button(
                             onClick = {
-                                val newSteps = calibrateInput.toIntOrNull() ?: steps
+                                val newSteps = calibrateInput.toIntOrNull() ?: state.stepsCurrent
                                 // Call some sync or just update state directly for UI calibration
                                 // Since we don't have a direct calibrate method in VM, just set it locally or via sync
                                 showCalibrateDialog = false
