@@ -1,7 +1,6 @@
 package com.personal.lifeos.ui.screens.tasks
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,50 +42,64 @@ fun TasksScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Daily Tasks",
+                        text = "Tasks & Productivity",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Slate100
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextDarkPrimary
                     )
                 },
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Task", tint = PrimaryLight)
+                        Icon(Icons.Default.AddCircle, contentDescription = "Add Task", tint = SkyBluePrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Slate950)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SkyBackground)
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = PrimaryIndigo,
-                contentColor = Slate100
+                containerColor = SkyBluePrimary,
+                contentColor = PureWhite,
+                shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(6.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Task")
             }
         },
-        containerColor = Slate950
+        containerColor = SkyBackground
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
-                Text(
-                    text = "CATEGORIZED WORKFLOW",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Slate400,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "TODAY'S ACTION ITEMS",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SkyBluePrimary,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp
+                    )
+                    Text(
+                        text = "${state.tasks.count { it.isCompleted }} of ${state.tasks.size} done",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextDarkSecondary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
 
             items(state.tasks, key = { it.id }) { task ->
-                TaskCard(
+                SkyTaskCard(
                     task = task,
                     onToggleComplete = {
                         scope.launch {
@@ -109,12 +124,12 @@ fun TasksScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(70.dp))
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
 
         if (showAddDialog) {
-            AddTaskDialog(
+            AddSkyTaskDialog(
                 onDismiss = { showAddDialog = false },
                 onAdd = { title, category, type, target, unit, isFlexible ->
                     scope.launch {
@@ -127,7 +142,7 @@ fun TasksScreen(
                                 targetValue = target,
                                 currentValue = 0.0,
                                 unit = unit,
-                                priority = 2,
+                                priority = 1,
                                 scheduledDate = today,
                                 isFlexible = isFlexible
                             )
@@ -141,17 +156,25 @@ fun TasksScreen(
 }
 
 @Composable
-fun TaskCard(
+fun SkyTaskCard(
     task: TaskEntity,
     onToggleComplete: () -> Unit,
     onStartTimer: () -> Unit,
     onIncrementProgress: (Double) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 2.dp, shape = RoundedCornerShape(18.dp), ambientColor = GlowSkyBlue),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (task.isCompleted) Slate900 else CardBackground
+            containerColor = if (task.isCompleted) OffWhite else PureWhite
+        ),
+        border = CardDefaults.outlinedCardBorder().copy(
+            brush = Brush.linearGradient(
+                if (task.isCompleted) listOf(DividerColor, PureWhite)
+                else listOf(CardBorderLight, PureWhite)
+            )
         )
     ) {
         Row(
@@ -160,13 +183,12 @@ fun TaskCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Checkbox
             Checkbox(
                 checked = task.isCompleted,
                 onCheckedChange = { onToggleComplete() },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = AccentEmerald,
-                    uncheckedColor = Slate700
+                    checkedColor = EmeraldSuccess,
+                    uncheckedColor = SkyBluePrimary
                 )
             )
 
@@ -176,8 +198,8 @@ fun TaskCard(
                 Text(
                     text = task.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (task.isCompleted) Slate400 else Slate100
+                    fontWeight = FontWeight.Bold,
+                    color = if (task.isCompleted) TextMuted else TextDarkPrimary
                 )
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -197,38 +219,38 @@ fun TaskCard(
                 Text(
                     text = "${task.category.uppercase()} • $progressText",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Slate400
+                    color = if (task.isCompleted) TextMuted else SkyBluePrimary,
+                    fontWeight = FontWeight.Medium
                 )
             }
 
-            // Quick actions based on type
             when (task.measurementType) {
                 "time_based" -> {
                     IconButton(
                         onClick = onStartTimer,
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(40.dp)
                             .clip(CircleShape)
-                            .background(PrimaryIndigo.copy(alpha = 0.2f))
+                            .background(SkyBlueSurface)
                     ) {
                         Icon(
                             Icons.Default.PlayArrow,
                             contentDescription = "Start Timer",
-                            tint = PrimaryLight,
-                            modifier = Modifier.size(20.dp)
+                            tint = SkyBluePrimary,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
                 "quantity_based" -> {
-                    Row {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(
                             onClick = { onIncrementProgress(1.0) },
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(SecondaryCyan.copy(alpha = 0.2f))
+                                .background(SkyBlueSurface)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = "Add 1", tint = SecondaryCyan)
+                            Icon(Icons.Default.Add, contentDescription = "Add", tint = SkyBluePrimary)
                         }
                     }
                 }
@@ -239,7 +261,7 @@ fun TaskCard(
 }
 
 @Composable
-fun AddTaskDialog(
+fun AddSkyTaskDialog(
     onDismiss: () -> Unit,
     onAdd: (title: String, category: String, type: String, target: Double, unit: String, isFlexible: Boolean) -> Unit
 ) {
@@ -251,24 +273,30 @@ fun AddTaskDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New Task", color = Slate100, fontWeight = FontWeight.Bold) },
+        title = { Text("Add Personal Task", color = TextDarkPrimary, fontWeight = FontWeight.Bold) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Task Title (e.g. Python, DSA)") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Task Title (e.g. Python, DSA, Walk)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 OutlinedTextField(
                     value = targetStr,
                     onValueChange = { targetStr = it },
-                    label = { Text(if (type == "time_based") "Target (Minutes)" else "Target Count") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text(if (type == "time_based") "Target Duration (Minutes)" else "Target Number") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = isFlexible, onCheckedChange = { isFlexible = it })
-                    Text("Flexible schedule (can shift if day is tight)", color = Slate400, fontSize = 12.sp)
+                    Checkbox(
+                        checked = isFlexible,
+                        onCheckedChange = { isFlexible = it },
+                        colors = CheckboxDefaults.colors(checkedColor = SkyBluePrimary)
+                    )
+                    Text("Flexible (Auto-shift if schedule is tight)", color = TextDarkSecondary, fontSize = 12.sp)
                 }
             }
         },
@@ -279,14 +307,15 @@ fun AddTaskDialog(
                     val unit = if (type == "time_based") "minutes" else "count"
                     onAdd(title, category, type, target, unit, isFlexible)
                 },
-                enabled = title.isNotBlank()
+                enabled = title.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
             ) {
                 Text("Create Task")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text("Cancel", color = TextDarkSecondary) }
         },
-        containerColor = CardBackground
+        containerColor = PureWhite
     )
 }

@@ -11,12 +11,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.personal.lifeos.ui.components.ProgressRing
+import com.personal.lifeos.ui.components.InfiniteAuraRing
 import com.personal.lifeos.ui.theme.*
 import com.personal.lifeos.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
@@ -30,7 +31,11 @@ fun HealthStepsScreen(
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
-    val stepPct = (state.stepsCurrent.toFloat() / state.stepsTarget).coerceIn(0f, 1f)
+    var showWeightDialog by remember { mutableStateOf(false) }
+    var currentWeight by remember { mutableStateOf(79.5) }
+    var weightInput by remember { mutableStateOf("79.5") }
+
+    val stepPct = if (state.stepsTarget > 0) (state.stepsCurrent.toFloat() / state.stepsTarget).coerceIn(0f, 1f) else 0f
     val distanceKm = state.stepsCurrent * 0.00075
     val caloriesBurned = state.stepsCurrent * 0.04
     val activeMinutes = state.stepsCurrent / 100
@@ -40,16 +45,16 @@ fun HealthStepsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Health & Activity",
+                        text = "Health & Step Activity",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Slate100
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextDarkPrimary
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Slate950)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SkyBackground)
             )
         },
-        containerColor = Slate950
+        containerColor = SkyBackground
     ) { padding ->
         Column(
             modifier = Modifier
@@ -59,34 +64,47 @@ fun HealthStepsScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Main Steps Card
+            // Main Steps Card with Infinite Aura
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackground)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp), ambientColor = GlowSkyBlue),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = PureWhite),
+                border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ProgressRing(
+                    Text(
+                        text = "HARDWARE PEDOMETER ACTIVE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SkyBluePrimary,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    InfiniteAuraRing(
                         progress = stepPct,
-                        size = 160.dp,
-                        strokeWidth = 14.dp,
-                        primaryColor = SecondaryCyan,
-                        secondaryColor = AccentEmerald
+                        size = 170.dp,
+                        strokeWidth = 14.dp
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = String.format("%,d", state.stepsCurrent),
                                 style = MaterialTheme.typography.headlineLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = Slate100
+                                fontWeight = FontWeight.ExtraBold,
+                                color = TextDarkPrimary,
+                                fontSize = 34.sp
                             )
                             Text(
                                 text = "of ${String.format("%,d", state.stepsTarget)} steps",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Slate400
+                                color = TextMuted,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
@@ -97,9 +115,9 @@ fun HealthStepsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        StatPill("Distance", String.format("%.1f km", distanceKm))
-                        StatPill("Calories", "${caloriesBurned.toInt()} kcal")
-                        StatPill("Active", "${activeMinutes} min")
+                        SkyStatPill("Distance", String.format("%.2f km", distanceKm))
+                        SkyStatPill("Calories", "${caloriesBurned.toInt()} kcal")
+                        SkyStatPill("Active Time", "${activeMinutes} min")
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -107,35 +125,49 @@ fun HealthStepsScreen(
                     Button(
                         onClick = {
                             scope.launch {
-                                // Add 500 steps simulation or Health Connect sync
-                                homeViewModel.repository.updateSteps(state.stepsCurrent + 500)
+                                // Real-time test step increment
+                                homeViewModel.repository.updateSteps(state.stepsCurrent + 250)
                             }
                         },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SecondaryCyan)
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary, contentColor = PureWhite),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
-                        Icon(Icons.Default.Sync, contentDescription = "Sync", tint = Slate950)
+                        Icon(Icons.Default.DirectionsWalk, contentDescription = "Step", modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Sync Health Connect (+500 steps)", color = Slate950, fontWeight = FontWeight.Bold)
+                        Text("Add Walking Steps (+250)", fontWeight = FontWeight.Bold)
                     }
                 }
             }
 
-            // Weight Tracking Card (Section 20)
+            // Weight & Body Metric Card
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceElevated)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = PureWhite),
+                border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
             ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Text(
-                        text = "BODY WEIGHT PROGRESS",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Slate400,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "WEIGHT & TARGET",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SkyBluePrimary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        IconButton(onClick = { showWeightDialog = true }, modifier = Modifier.size(28.dp)) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit Weight", tint = SkyBluePrimary)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -143,64 +175,69 @@ fun HealthStepsScreen(
                     ) {
                         Column {
                             Text(
-                                text = "79.5 kg",
+                                text = "$currentWeight kg",
                                 style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Slate100
+                                fontWeight = FontWeight.ExtraBold,
+                                color = TextDarkPrimary
                             )
-                            Text("Current Weight", style = MaterialTheme.typography.labelSmall, color = Slate400)
+                            Text("Current Weight", style = MaterialTheme.typography.labelSmall, color = TextDarkSecondary)
                         }
 
-                        Icon(Icons.Default.ArrowForward, contentDescription = "to", tint = Slate400)
+                        Icon(Icons.Default.ArrowForward, contentDescription = "to", tint = SkyBluePrimary)
 
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
                                 text = "75.0 kg",
                                 style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = AccentEmerald
+                                fontWeight = FontWeight.ExtraBold,
+                                color = EmeraldSuccess
                             )
-                            Text("Target Goal", style = MaterialTheme.typography.labelSmall, color = Slate400)
+                            Text("Goal Target", style = MaterialTheme.typography.labelSmall, color = TextDarkSecondary)
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Trend: -1.7 kg over last 30 days. On healthy pace.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = AccentEmerald
-                    )
                 }
             }
+        }
 
-            // Weekly Step Insights (Section 15 & 28)
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackground)
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Text(
-                        text = "WEEKLY STEP CONSISTENCY",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Slate400,
-                        fontWeight = FontWeight.Bold
+        if (showWeightDialog) {
+            AlertDialog(
+                onDismissRequest = { showWeightDialog = false },
+                title = { Text("Log Current Weight", color = TextDarkPrimary, fontWeight = FontWeight.Bold) },
+                text = {
+                    OutlinedTextField(
+                        value = weightInput,
+                        onValueChange = { weightInput = it },
+                        label = { Text("Weight (kg)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Average: 9,774 steps/day • Best Day: 11,200 steps",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Slate100
-                    )
-                }
-            }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            weightInput.toDoubleOrNull()?.let {
+                                currentWeight = it
+                            }
+                            showWeightDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
+                    ) {
+                        Text("Save Weight")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showWeightDialog = false }) { Text("Cancel") }
+                },
+                containerColor = PureWhite
+            )
         }
     }
 }
 
 @Composable
-fun StatPill(label: String, value: String) {
+fun SkyStatPill(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Slate100)
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Slate400)
+        Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = TextDarkPrimary)
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = TextDarkSecondary)
     }
 }

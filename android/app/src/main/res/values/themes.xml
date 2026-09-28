@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.LifeOS" parent="android:Theme.Material.NoActionBar">
-        <item name="android:statusBarColor">#0B0F19</item>
-        <item name="android:navigationBarColor">#0B0F19</item>
-        <item name="android:windowBackground">#0B0F19</item>
+    <style name="Theme.LifeOS" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#F0F9FF</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowBackground">#F0F9FF</item>
     </style>
 </resources>

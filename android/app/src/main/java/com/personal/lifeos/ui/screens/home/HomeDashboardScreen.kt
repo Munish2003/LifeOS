@@ -3,23 +3,26 @@ package com.personal.lifeos.ui.screens.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.personal.lifeos.ui.components.MetricCard
-import com.personal.lifeos.ui.components.NextActionCard
-import com.personal.lifeos.ui.components.ProgressRing
+import com.personal.lifeos.data.remote.DirectAiClient
+import com.personal.lifeos.ui.components.InfiniteAuraRing
+import com.personal.lifeos.ui.components.SkyMetricCard
+import com.personal.lifeos.ui.components.SkyNextActionCard
 import com.personal.lifeos.ui.theme.*
 import com.personal.lifeos.ui.viewmodel.HomeViewModel
 import java.text.SimpleDateFormat
@@ -35,6 +38,7 @@ fun HomeDashboardScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
+    var showSettingsDialog by remember { mutableStateOf(false) }
 
     val dateFormatted = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()).format(Date())
 
@@ -44,15 +48,16 @@ fun HomeDashboardScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Good Morning 👋",
+                            text = "Good Day 👋",
                             style = MaterialTheme.typography.titleMedium,
-                            color = Slate400
+                            color = SkyBluePrimary,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = dateFormatted,
                             style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate100
+                            fontWeight = FontWeight.ExtraBold,
+                            color = TextDarkPrimary
                         )
                     }
                 },
@@ -61,16 +66,23 @@ fun HomeDashboardScreen(
                         Icon(
                             Icons.Default.CalendarMonth,
                             contentDescription = "Schedule",
-                            tint = Slate100
+                            tint = SkyBluePrimary
+                        )
+                    }
+                    IconButton(onClick = { showSettingsDialog = true }) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = TextDarkSecondary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Slate950
+                    containerColor = SkyBackground
                 )
             )
         },
-        containerColor = Slate950
+        containerColor = SkyBackground
     ) { padding ->
         Column(
             modifier = Modifier
@@ -79,66 +91,79 @@ fun HomeDashboardScreen(
                 .verticalScroll(scrollState)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            // Overall Daily Progress Ring Card
+            // Main Hero Card: Overall Daily Progress with Infinite Rotating Aura
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackground)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(26.dp), ambientColor = GlowSkyBlue),
+                shape = RoundedCornerShape(26.dp),
+                colors = CardDefaults.cardColors(containerColor = PureWhite),
+                border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
             ) {
                 Row(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.padding(22.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Overall Daily Progress",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Slate400,
-                            fontWeight = FontWeight.Medium
+                            text = "DAILY LIFE SCORE",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SkyBluePrimary,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.2.sp
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "${(state.overallProgressPct * 100).toInt()}%",
                             style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate100
+                            fontWeight = FontWeight.ExtraBold,
+                            color = TextDarkPrimary,
+                            fontSize = 38.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                         val availMins = state.availability?.availableFocusedMinutes ?: 150
-                        Text(
-                            text = "${availMins / 60}h ${availMins % 60}m realistic time free",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = AccentEmerald,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = SkyBlueSurface
+                        ) {
+                            Text(
+                                text = "${availMins / 60}h ${availMins % 60}m usable focus time",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = SkyBluePrimary,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
                     }
 
-                    ProgressRing(
+                    // Rotating Aura Progress Ring
+                    InfiniteAuraRing(
                         progress = state.overallProgressPct,
-                        size = 96.dp,
-                        strokeWidth = 10.dp,
-                        primaryColor = PrimaryIndigo,
-                        secondaryColor = SecondaryCyan
+                        size = 110.dp,
+                        strokeWidth = 10.dp
                     ) {
                         Text(
                             text = "${(state.overallProgressPct * 100).toInt()}%",
-                            fontWeight = FontWeight.Bold,
-                            color = Slate100,
-                            fontSize = 16.sp
+                            fontWeight = FontWeight.ExtraBold,
+                            color = SkyBluePrimary,
+                            fontSize = 20.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // Conflict Warning Banner if day is overloaded (Section 9, 22, 47)
+            // Conflict Warning Banner if day is overloaded
             state.availability?.conflictMessage?.let { conflict ->
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = AccentRose.copy(alpha = 0.15f))
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(elevation = 2.dp, shape = RoundedCornerShape(16.dp)),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = AmberWarning.copy(alpha = 0.12f)),
+                    border = CardDefaults.outlinedCardBorder().copy(brush = Brush.horizontalGradient(listOf(AmberWarning, PureWhite)))
                 ) {
                     Row(
                         modifier = Modifier.padding(14.dp),
@@ -147,116 +172,167 @@ fun HomeDashboardScreen(
                         Icon(
                             Icons.Default.Warning,
                             contentDescription = "Conflict",
-                            tint = AccentRose,
+                            tint = AmberWarning,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "SCHEDULE CONFLICT",
+                                text = "SCHEDULE NOTICE",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = AccentRose
+                                color = AmberWarning
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = conflict,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Slate100
+                                color = TextDarkPrimary
                             )
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
             }
 
-            // Next Action Card (Section 24)
-            val nextTask = state.availability?.recommendedTask
+            // Next Action Card with continuous breathing glow
+            val nextTask = state.availability?.recommendedTask ?: state.tasks.firstOrNull { !it.isCompleted }
             val nextTitle = nextTask?.title ?: "Python Deep Work"
             val nextRemMins = if (nextTask != null && nextTask.measurementType == "time_based") {
-                (nextTask.targetValue - nextTask.currentValue).toInt()
-            } else 43
+                kotlin.math.max(1, (nextTask.targetValue - nextTask.currentValue).toInt())
+            } else 45
 
-            NextActionCard(
+            SkyNextActionCard(
                 taskTitle = nextTitle,
                 remainingMinutes = nextRemMins,
                 reason = state.availability?.recommendedReason
-                    ?: "You have a free focused slot. Python is due today and has 43 minutes remaining.",
+                    ?: "You have an available focus window right now. Start a session to make meaningful progress.",
                 onStartTimer = { onNavigateToTimer(nextTitle) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "TODAY'S METRICS",
+                text = "REAL-TIME TRACKING",
                 style = MaterialTheme.typography.labelSmall,
-                color = Slate400,
+                color = SkyBluePrimary,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Steps Metric Card (Section 6 & 15)
-            MetricCard(
-                title = "Steps",
+            // Steps Metric Card (Real hardware sensor)
+            SkyMetricCard(
+                title = "Hardware Steps",
                 currentFormatted = String.format("%,d", state.stepsCurrent),
                 targetFormatted = String.format("%,d", state.stepsTarget),
-                progress = state.stepsCurrent.toFloat() / state.stepsTarget,
+                progress = if (state.stepsTarget > 0) state.stepsCurrent.toFloat() / state.stepsTarget else 0f,
                 icon = {
                     Icon(
                         Icons.Default.DirectionsWalk,
                         contentDescription = "Steps",
-                        tint = SecondaryCyan,
-                        modifier = Modifier.size(20.dp)
+                        tint = CyanAccent,
+                        modifier = Modifier.size(22.dp)
                     )
                 },
-                accentColor = SecondaryCyan
+                accentColor = CyanAccent
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Calories Metric Card (Section 6 & 17)
-            MetricCard(
-                title = "Calories",
+            // Calories Metric Card (Real Food Logged)
+            SkyMetricCard(
+                title = "Diet & Calories",
                 currentFormatted = "${state.caloriesCurrent.toInt()} kcal",
                 targetFormatted = "${state.caloriesTarget.toInt()} kcal",
-                progress = (state.caloriesCurrent.toFloat() / state.caloriesTarget.toFloat()),
+                progress = if (state.caloriesTarget > 0) (state.caloriesCurrent.toFloat() / state.caloriesTarget.toFloat()) else 0f,
                 icon = {
                     Icon(
                         Icons.Default.Restaurant,
                         contentDescription = "Calories",
-                        tint = AccentAmber,
-                        modifier = Modifier.size(20.dp)
+                        tint = AmberWarning,
+                        modifier = Modifier.size(22.dp)
                     )
                 },
-                accentColor = AccentAmber
+                accentColor = AmberWarning
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Focus Time Metric Card (Section 6 & 14)
+            // Focus Time Metric Card (Real Timer Sessions)
             val currH = state.focusMinutesCurrent / 60
             val currM = state.focusMinutesCurrent % 60
             val targH = state.focusMinutesTarget / 60
             val targM = state.focusMinutesTarget % 60
-            MetricCard(
-                title = "Focus Time",
+            SkyMetricCard(
+                title = "Focused Study & Deep Work",
                 currentFormatted = "${currH}h ${currM}m",
                 targetFormatted = if (targM == 0) "${targH}h" else "${targH}h ${targM}m",
-                progress = state.focusMinutesCurrent.toFloat() / state.focusMinutesTarget,
+                progress = if (state.focusMinutesTarget > 0) state.focusMinutesCurrent.toFloat() / state.focusMinutesTarget else 0f,
                 icon = {
                     Icon(
                         Icons.Default.Computer,
                         contentDescription = "Focus",
-                        tint = PrimaryLight,
-                        modifier = Modifier.size(20.dp)
+                        tint = SkyBluePrimary,
+                        modifier = Modifier.size(22.dp)
                     )
                 },
-                accentColor = PrimaryIndigo
+                accentColor = SkyBluePrimary
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // Settings Dialog for custom Server IP and Hugging Face API key
+        if (showSettingsDialog) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            var hfKey by remember { mutableStateOf(DirectAiClient.getHfKey(context)) }
+            var serverUrl by remember { mutableStateOf(DirectAiClient.getServerUrl(context)) }
+
+            AlertDialog(
+                onDismissRequest = { showSettingsDialog = false },
+                title = { Text("App & AI Connection Settings", color = TextDarkPrimary, fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            "Mobile AI seedhe Hugging Face cloud ya aapke backend computer se connect ho sakti hai:",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextDarkSecondary
+                        )
+                        OutlinedTextField(
+                            value = hfKey,
+                            onValueChange = { hfKey = it },
+                            label = { Text("Hugging Face API Key") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = serverUrl,
+                            onValueChange = { serverUrl = it },
+                            label = { Text("Backend URL (e.g. http://192.168.1.106:8000/)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            DirectAiClient.saveHfKey(context, hfKey)
+                            DirectAiClient.saveServerUrl(context, serverUrl)
+                            showSettingsDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
+                    ) {
+                        Text("Save & Apply")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showSettingsDialog = false }) { Text("Cancel") }
+                },
+                containerColor = PureWhite
+            )
         }
     }
 }

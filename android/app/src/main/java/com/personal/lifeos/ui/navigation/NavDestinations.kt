@@ -1,10 +1,16 @@
 package com.personal.lifeos.ui.navigation
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.personal.lifeos.ui.theme.*
@@ -15,9 +21,6 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Health : Screen("health", "Health", Icons.Default.DirectionsWalk)
     object Food : Screen("food", "Food", Icons.Default.Restaurant)
     object Goals : Screen("goals", "Goals", Icons.Default.EmojiEvents)
-    object Timer : Screen("timer", "Timer", Icons.Default.Timer)
-    object Routine : Screen("routine", "Schedule", Icons.Default.CalendarToday)
-    object Analytics : Screen("analytics", "Analytics", Icons.Default.BarChart)
     object AI : Screen("ai", "Life AI", Icons.Default.AutoAwesome)
 }
 
@@ -35,8 +38,10 @@ fun LifeOsBottomBar(navController: NavController) {
     val currentRoute = navBackStackEntry.value?.destination?.route
 
     NavigationBar(
-        containerColor = Slate950,
-        contentColor = Slate100
+        containerColor = PureWhite,
+        contentColor = SkyBluePrimary,
+        tonalElevation = 8.dp,
+        modifier = Modifier.shadow(8.dp)
     ) {
         BottomNavItems.forEach { screen ->
             val isSelected = currentRoute == screen.route
@@ -45,14 +50,15 @@ fun LifeOsBottomBar(navController: NavController) {
                     Icon(
                         screen.icon,
                         contentDescription = screen.title,
-                        tint = if (isSelected) PrimaryLight else Slate400
+                        tint = if (isSelected) SkyBluePrimary else TextMuted
                     )
                 },
                 label = {
                     Text(
                         screen.title,
-                        color = if (isSelected) Slate100 else Slate400,
-                        style = MaterialTheme.typography.labelSmall
+                        color = if (isSelected) SkyBluePrimary else TextMuted,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 11.sp
                     )
                 },
                 selected = isSelected,
@@ -66,7 +72,9 @@ fun LifeOsBottomBar(navController: NavController) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = PrimaryIndigo.copy(alpha = 0.2f)
+                    indicatorColor = SkyBlueSurface,
+                    selectedIconColor = SkyBluePrimary,
+                    unselectedIconColor = TextMuted
                 )
             )
         }

@@ -8,11 +8,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,26 +41,26 @@ fun RoutineAvailabilityScreen(
     }
 
     val availMins = state.availability?.availableFocusedMinutes ?: 150
-    val reqMins = state.availability?.requiredTaskMinutes ?: 160
+    val reqMins = state.availability?.requiredTaskMinutes ?: 60
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Daily Schedule & Routines", color = Slate100, fontWeight = FontWeight.Bold) },
+                title = { Text("Daily Schedule & Routines", color = TextDarkPrimary, fontWeight = FontWeight.ExtraBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate100)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = SkyBluePrimary)
                     }
                 },
                 actions = {
                     TextButton(onClick = { showOutingDialog = true }) {
-                        Text("+ Plan Outing", color = SecondaryCyan, fontWeight = FontWeight.Bold)
+                        Text("+ Plan Outing", color = SkyBluePrimary, fontWeight = FontWeight.Bold)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Slate950)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SkyBackground)
             )
         },
-        containerColor = Slate950
+        containerColor = SkyBackground
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -71,15 +72,18 @@ fun RoutineAvailabilityScreen(
             // Availability Engine Summary
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(elevation = 3.dp, shape = RoundedCornerShape(20.dp), ambientColor = GlowSkyBlue),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = PureWhite),
+                    border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             text = "AVAILABILITY CALCULATION (LEVEL 1 DETERMINISTIC)",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Slate400,
+                            color = SkyBluePrimary,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(10.dp))
@@ -91,19 +95,19 @@ fun RoutineAvailabilityScreen(
                                 Text(
                                     text = "${availMins / 60}h ${availMins % 60}m",
                                     style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = AccentEmerald
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = SkyBluePrimary
                                 )
-                                Text("Available Focused Time", style = MaterialTheme.typography.labelSmall, color = Slate400)
+                                Text("Available Focused Time", style = MaterialTheme.typography.labelSmall, color = TextDarkSecondary)
                             }
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
                                     text = "${reqMins / 60}h ${reqMins % 60}m",
                                     style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (availMins >= reqMins) Slate100 else AccentRose
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = if (availMins >= reqMins) TextDarkPrimary else AmberWarning
                                 )
-                                Text("Required by Tasks", style = MaterialTheme.typography.labelSmall, color = Slate400)
+                                Text("Required by Tasks", style = MaterialTheme.typography.labelSmall, color = TextDarkSecondary)
                             }
                         }
 
@@ -111,14 +115,20 @@ fun RoutineAvailabilityScreen(
                         val statusText = if (availMins >= reqMins) {
                             "Feasible schedule. You have a ${availMins - reqMins}m buffer."
                         } else {
-                            "Conflict: ${reqMins - availMins}m shortage. Move flexible tasks to tomorrow."
+                            "Notice: ${reqMins - availMins}m shortage. Move flexible tasks to tomorrow."
                         }
-                        Text(
-                            text = statusText,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (availMins >= reqMins) AccentEmerald else AccentRose,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (availMins >= reqMins) SkyBlueSurface else AmberWarning.copy(alpha = 0.12f)
+                        ) {
+                            Text(
+                                text = statusText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (availMins >= reqMins) SkyBluePrimary else AmberWarning,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -127,20 +137,23 @@ fun RoutineAvailabilityScreen(
                 Text(
                     text = "FIXED ROUTINE & COMMITMENT BLOCKS",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Slate400,
+                    color = SkyBluePrimary,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    letterSpacing = 1.2.sp
                 )
             }
 
             items(blocks, key = { it.id }) { block ->
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceElevated)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp)),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = PureWhite),
+                    border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
                 ) {
                     Row(
-                        modifier = Modifier.padding(14.dp).fillMaxWidth(),
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -148,22 +161,28 @@ fun RoutineAvailabilityScreen(
                             Text(
                                 text = block.name,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Slate100
+                                fontWeight = FontWeight.Bold,
+                                color = TextDarkPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "${block.category.uppercase()} • ${block.durationMinutes} min",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Slate400
+                                color = TextDarkSecondary
                             )
                         }
-                        Text(
-                            text = "${block.startTime} - ${block.endTime}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = SecondaryCyan
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = SkyBlueSurface
+                        ) {
+                            Text(
+                                text = "${block.startTime} - ${block.endTime}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = SkyBluePrimary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -172,11 +191,11 @@ fun RoutineAvailabilityScreen(
         if (showOutingDialog) {
             AlertDialog(
                 onDismissRequest = { showOutingDialog = false },
-                title = { Text("Plan Outing / Commitment", color = Slate100, fontWeight = FontWeight.Bold) },
+                title = { Text("Plan Outing / Commitment", color = TextDarkPrimary, fontWeight = FontWeight.Bold) },
                 text = {
                     Text(
                         "Add a 4-hour outing block today (e.g. 14:00 - 18:00)? The availability engine will automatically recalculate your remaining time.",
-                        color = Slate400
+                        color = TextDarkSecondary
                     )
                 },
                 confirmButton = {
@@ -195,7 +214,8 @@ fun RoutineAvailabilityScreen(
                                 )
                                 showOutingDialog = false
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
                     ) {
                         Text("Confirm Outing")
                     }
@@ -203,7 +223,7 @@ fun RoutineAvailabilityScreen(
                 dismissButton = {
                     TextButton(onClick = { showOutingDialog = false }) { Text("Cancel") }
                 },
-                containerColor = CardBackground
+                containerColor = PureWhite
             )
         }
     }

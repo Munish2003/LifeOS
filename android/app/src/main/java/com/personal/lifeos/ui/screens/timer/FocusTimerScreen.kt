@@ -2,6 +2,8 @@ package com.personal.lifeos.ui.screens.timer
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -13,6 +15,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -54,19 +61,31 @@ fun FocusTimerScreen(
     val seconds = elapsedSeconds % 60
     val timeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds)
 
+    // Continuous Infinite Breathing Wave when timer is running
+    val infiniteTransition = rememberInfiniteTransition(label = "TimerPulse")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (isRunning) 1.05f else 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "TimerPulseScale"
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(taskTitle, color = Slate100, fontWeight = FontWeight.Bold) },
+                title = { Text(taskTitle, color = TextDarkPrimary, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate100)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = SkyBluePrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Slate950)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SkyBackground)
             )
         },
-        containerColor = Slate950
+        containerColor = SkyBackground
     ) { padding ->
         Column(
             modifier = Modifier
@@ -77,48 +96,74 @@ fun FocusTimerScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = SkyBlueSurface
+                ) {
+                    Text(
+                        text = if (isRunning) "ACTIVE DEEP FOCUS" else "TIMER READY",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SkyBluePrimary,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.5.sp,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "DEEP FOCUS SESSION",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = PrimaryLight,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Stay uninterrupted. Background tracking active.",
+                    text = "Background service active. Locks safely with screen off.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Slate400
+                    color = TextDarkSecondary
                 )
             }
 
-            // Big Timer Display
+            // Big Animated Stopwatch Dial
             Box(
                 modifier = Modifier
                     .size(280.dp)
+                    .scale(pulseScale)
+                    .shadow(elevation = 8.dp, shape = CircleShape, spotColor = GlowSkyBlue)
                     .clip(CircleShape)
-                    .background(SurfaceElevated),
+                    .background(PureWhite),
                 contentAlignment = Alignment.Center
             ) {
+                // Circular Ring track
+                Canvas(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+                    drawCircle(
+                        color = SkyBlueSurface,
+                        style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round)
+                    )
+                    if (isRunning) {
+                        val sweep = ((elapsedSeconds % 60) / 60f) * 360f
+                        drawArc(
+                            brush = Brush.sweepGradient(listOf(SkyBluePrimary, CyanAccent, SkyBlueLight)),
+                            startAngle = -90f,
+                            sweepAngle = sweep,
+                            useCenter = false,
+                            style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round)
+                        )
+                    }
+                }
+
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = timeFormatted,
-                        fontSize = 44.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 42.sp,
+                        fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.Monospace,
-                        color = Slate100
+                        color = TextDarkPrimary
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = if (isRunning) "SESSION IN PROGRESS" else "PAUSED",
+                        text = if (isRunning) "TRACKING..." else "PAUSED",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (isRunning) AccentEmerald else Slate400,
+                        color = if (isRunning) EmeraldSuccess else TextMuted,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // Controls
+            // Control Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -131,7 +176,11 @@ fun FocusTimerScreen(
                             .height(56.dp)
                             .weight(1f),
                         shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = SkyBluePrimary,
+                            contentColor = PureWhite
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                     ) {
                         Icon(Icons.Default.PlayArrow, contentDescription = "Start")
                         Spacer(modifier = Modifier.width(8.dp))
@@ -143,11 +192,12 @@ fun FocusTimerScreen(
                         modifier = Modifier
                             .height(56.dp)
                             .weight(1f),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = SkyBluePrimary)
                     ) {
-                        Icon(Icons.Default.Pause, contentDescription = "Pause", tint = Slate100)
+                        Icon(Icons.Default.Pause, contentDescription = "Pause", tint = SkyBluePrimary)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Pause", color = Slate100, fontWeight = FontWeight.Bold)
+                        Text("Pause", color = SkyBluePrimary, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -158,7 +208,6 @@ fun FocusTimerScreen(
                             val savedSeconds = elapsedSeconds
                             sendTimerAction(TimerService.ACTION_STOP)
                             scope.launch {
-                                // Save session to database and update task
                                 val task = homeViewModel.uiState.value.tasks.find { it.title == taskTitle }
                                 if (task != null) {
                                     homeViewModel.repository.recordSession(task.id, savedSeconds)
@@ -170,7 +219,11 @@ fun FocusTimerScreen(
                             .height(56.dp)
                             .weight(1f),
                         shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = AccentEmerald)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = EmeraldSuccess,
+                            contentColor = PureWhite
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                     ) {
                         Icon(Icons.Default.Check, contentDescription = "Finish")
                         Spacer(modifier = Modifier.width(8.dp))

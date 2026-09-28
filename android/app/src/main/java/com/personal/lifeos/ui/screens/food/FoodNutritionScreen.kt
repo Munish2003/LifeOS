@@ -11,6 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +35,7 @@ fun FoodNutritionScreen(
 
     var foodInput by remember { mutableStateOf("") }
     var foodList by remember { mutableStateOf<List<FoodEntity>>(emptyList()) }
+    var isEstimating by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         homeViewModel.repository.getTodayFoodEntries().collect {
@@ -40,7 +43,7 @@ fun FoodNutritionScreen(
         }
     }
 
-    val totalCalories = if (foodList.isNotEmpty()) foodList.sumOf { it.calories } else 860.0
+    val totalCalories = foodList.sumOf { it.calories }
     val targetCalories = 1200.0
     val remainingCalories = kotlin.math.max(0.0, targetCalories - totalCalories)
 
@@ -49,16 +52,16 @@ fun FoodNutritionScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Food & Nutrition",
+                        text = "Food & Calorie Tracker",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Slate100
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextDarkPrimary
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Slate950)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SkyBackground)
             )
         },
-        containerColor = Slate950
+        containerColor = SkyBackground
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -70,11 +73,14 @@ fun FoodNutritionScreen(
             // Calorie Budget Card
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(elevation = 3.dp, shape = RoundedCornerShape(22.dp), ambientColor = GlowSkyBlue),
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(containerColor = PureWhite),
+                    border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
+                    Column(modifier = Modifier.padding(22.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -82,43 +88,52 @@ fun FoodNutritionScreen(
                         ) {
                             Column {
                                 Text(
-                                    text = "CALORIE INTAKE",
+                                    text = "CALORIE BUDGET",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Slate400,
+                                    color = SkyBluePrimary,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = "${totalCalories.toInt()} / ${targetCalories.toInt()} kcal",
                                     style = MaterialTheme.typography.headlineLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Slate100
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = TextDarkPrimary,
+                                    fontSize = 32.sp
                                 )
                             }
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = "${remainingCalories.toInt()} kcal",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (remainingCalories > 0) AccentEmerald else AccentRose
-                                )
-                                Text("Remaining", style = MaterialTheme.typography.labelSmall, color = Slate400)
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (remainingCalories > 0) SkyBlueSurface else AmberWarning.copy(alpha = 0.15f)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                    horizontalAlignment = Alignment.End
+                                ) {
+                                    Text(
+                                        text = "${remainingCalories.toInt()} kcal",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (remainingCalories > 0) SkyBluePrimary else AmberWarning
+                                    )
+                                    Text("Remaining", style = MaterialTheme.typography.labelSmall, color = TextDarkSecondary)
+                                }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
 
                         // Macro Nutrients Summary
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            val totalProt = foodList.sumOf { it.proteinG }.let { if (it > 0) it else 38.8 }
-                            val totalCarbs = foodList.sumOf { it.carbsG }.let { if (it > 0) it else 114.5 }
-                            val totalFat = foodList.sumOf { it.fatG }.let { if (it > 0) it else 32.3 }
-                            MacroTag("Protein", "${totalProt.toInt()}g", PrimaryIndigo)
-                            MacroTag("Carbs", "${totalCarbs.toInt()}g", SecondaryCyan)
-                            MacroTag("Fat", "${totalFat.toInt()}g", AccentAmber)
+                            val totalProt = foodList.sumOf { it.proteinG }
+                            val totalCarbs = foodList.sumOf { it.carbsG }
+                            val totalFat = foodList.sumOf { it.fatG }
+                            SkyMacroTag("Protein", "${totalProt.toInt()}g", SkyBluePrimary)
+                            SkyMacroTag("Carbs", "${totalCarbs.toInt()}g", CyanAccent)
+                            SkyMacroTag("Fats", "${totalFat.toInt()}g", AmberWarning)
                         }
                     }
                 }
@@ -127,29 +142,35 @@ fun FoodNutritionScreen(
             // Quick Natural Language or Photo Log Input
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceElevated)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp)),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = PureWhite),
+                    border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Text(
-                            text = "QUICK FOOD LOG (TEXT / OCR)",
+                            text = "AI FOOD LOGGER (TEXT / VOICE / OCR)",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Slate400,
-                            fontWeight = FontWeight.Bold
+                            color = SkyBluePrimary,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         OutlinedTextField(
                             value = foodInput,
                             onValueChange = { foodInput = it },
-                            placeholder = { Text("e.g. 2 rotis and paneer, 1 glass milk...") },
+                            placeholder = { Text("e.g. 2 roti paneer, 1 bowl dal, sandwich...") },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(14.dp),
+                            singleLine = true
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = {
                                 if (foodInput.isNotBlank()) {
+                                    isEstimating = true
                                     scope.launch {
                                         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                                         val estimate = homeViewModel.repository.parseFoodText(foodInput)
@@ -159,7 +180,7 @@ fun FoodNutritionScreen(
                                             FoodEntity(
                                                 date = today,
                                                 time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-                                                mealType = "snack",
+                                                mealType = "meal",
                                                 foodName = name,
                                                 portionDesc = foodInput,
                                                 calories = cal,
@@ -171,16 +192,23 @@ fun FoodNutritionScreen(
                                             )
                                         )
                                         foodInput = ""
+                                        isEstimating = false
                                     }
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = AccentAmber)
+                            colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary, contentColor = PureWhite)
                         ) {
-                            Icon(Icons.Default.AddCircle, contentDescription = "Log Food", tint = Slate950)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Estimate & Log Food", color = Slate950, fontWeight = FontWeight.Bold)
+                            if (isEstimating) {
+                                CircularProgressIndicator(color = PureWhite, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Estimating Nutrition...")
+                            } else {
+                                Icon(Icons.Default.AddCircle, contentDescription = "Log Food", tint = PureWhite)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Estimate Calories & Log Food", fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
@@ -190,49 +218,67 @@ fun FoodNutritionScreen(
                 Text(
                     text = "TODAY'S LOGGED MEALS",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Slate400,
+                    color = SkyBluePrimary,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    letterSpacing = 1.2.sp
                 )
             }
 
-            items(foodList, key = { it.id }) { item ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(14.dp).fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+            if (foodList.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = PureWhite),
+                        border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = item.foodName,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Slate100
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "${item.mealType.uppercase()} • ${item.time ?: "Logged"}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Slate400
-                            )
+                        Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                            Text("No meals logged yet today. Type a meal above to track!", color = TextDarkSecondary, fontSize = 14.sp)
                         }
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = "${item.calories.toInt()} kcal",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = AccentAmber
-                            )
-                            Text(
-                                text = "P:${item.proteinG.toInt()}g C:${item.carbsG.toInt()}g F:${item.fatG.toInt()}g",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Slate400
-                            )
+                    }
+                }
+            } else {
+                items(foodList, key = { it.id }) { item ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp)),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = PureWhite),
+                        border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, PureWhite)))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = item.foodName,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextDarkPrimary
+                                )
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = "${item.mealType.uppercase()} • ${item.time ?: "Logged"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextDarkSecondary
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = "${item.calories.toInt()} kcal",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = SkyBluePrimary
+                                )
+                                Text(
+                                    text = "P:${item.proteinG.toInt()}g C:${item.carbsG.toInt()}g F:${item.fatG.toInt()}g",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = TextMuted
+                                )
+                            }
                         }
                     }
                 }
@@ -242,9 +288,9 @@ fun FoodNutritionScreen(
 }
 
 @Composable
-fun MacroTag(name: String, value: String, color: androidx.compose.ui.graphics.Color) {
+fun SkyMacroTag(name: String, value: String, color: androidx.compose.ui.graphics.Color) {
     Column {
-        Text(name, style = MaterialTheme.typography.labelSmall, color = Slate400)
-        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = color)
+        Text(name, style = MaterialTheme.typography.labelSmall, color = TextDarkSecondary)
+        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = color)
     }
 }

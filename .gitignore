@@ -32,6 +32,9 @@ backend/lifeos.db
 venv/
 .venv/
 
-# Archives & Temporary files
+# Archives & Exported APKs
 LifeOS_Mobile_Project.zip
+LifeOS.apk
+exported_apk/
+*.apk
 *.log
