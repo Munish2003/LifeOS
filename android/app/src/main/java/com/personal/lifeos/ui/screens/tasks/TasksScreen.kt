@@ -341,56 +341,167 @@ fun AddSkyTaskDialog(
     onAdd: (title: String, category: String, type: String, target: Double, unit: String, isFlexible: Boolean) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("learning") }
-    var type by remember { mutableStateOf("time_based") }
-    var targetStr by remember { mutableStateOf("60") }
-    var isFlexible by remember { mutableStateOf(true) }
+    var priority by remember { mutableStateOf("P2") }
+    var targetMins by remember { mutableStateOf("45") }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add Personal Task", color = TextDarkPrimary, fontWeight = FontWeight.Bold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Task Title (e.g. Python, DSA, Walk)") },
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = PureWhite),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // Header
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                OutlinedTextField(
-                    value = targetStr,
-                    onValueChange = { targetStr = it },
-                    label = { Text(if (type == "time_based") "Target Duration (Minutes)" else "Target Number") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isFlexible,
-                        onCheckedChange = { isFlexible = it },
-                        colors = CheckboxDefaults.colors(checkedColor = SkyBluePrimary)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            shape = CircleShape,
+                            color = SkyBlueSurface,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("⚡", fontSize = 16.sp)
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("Create New Task", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = TextDarkPrimary)
+                    }
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextDarkSecondary)
+                    }
+                }
+
+                // Task Title
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(CyanAccent))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Task Title", style = MaterialTheme.typography.labelMedium, color = TextDarkSecondary, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        placeholder = { Text("e.g. Solve LeetCode DP Problems") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = SkyBluePrimary,
+                            unfocusedBorderColor = CardBorderLight
+                        )
                     )
-                    Text("Flexible (Auto-shift if schedule is tight)", color = TextDarkSecondary, fontSize = 12.sp)
+                }
+
+                // Priority Level
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFF59E0B))) // Amber
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Priority Level", style = MaterialTheme.typography.labelMedium, color = TextDarkSecondary, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val priorities = listOf("P1" to "🚨 P1 Critical", "P2" to "⚡ P2 High", "P3" to "☕ P3 Normal")
+                        priorities.forEach { (key, label) ->
+                            val isSelected = priority == key
+                            Surface(
+                                onClick = { priority = key },
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (isSelected) SkyBlueSurface else PureWhite,
+                                border = if (!isSelected) CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.Brush.linearGradient(listOf(CardBorderLight, Color.Transparent))) else null,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = label,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isSelected) SkyBluePrimary else TextMuted,
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Target Duration
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF8B5CF6))) // Purple
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Target Duration", style = MaterialTheme.typography.labelMedium, color = TextDarkSecondary, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf("15", "25", "45", "60", "90").forEach { mins ->
+                            val isSelected = targetMins == mins
+                            Surface(
+                                onClick = { targetMins = mins },
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isSelected) SkyBluePrimary else SkyBlueSurface,
+                                modifier = Modifier.defaultMinSize(minWidth = 48.dp)
+                            ) {
+                                Text(
+                                    text = "${mins}m",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) PureWhite else SkyBluePrimary,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = targetMins,
+                        onValueChange = { targetMins = it.filter { char -> char.isDigit() } },
+                        trailingIcon = { Text("mins", color = TextMuted, modifier = Modifier.padding(end = 16.dp)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = SkyBluePrimary,
+                            unfocusedBorderColor = CardBorderLight
+                        )
+                    )
+                }
+
+                // Create Button
+                Button(
+                    onClick = {
+                        val target = targetMins.toDoubleOrNull() ?: 45.0
+                        onAdd(title, priority, "time_based", target, "minutes", true)
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    enabled = title.isNotBlank(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary, disabledContainerColor = SkyBlueSurface),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                ) {
+                    Text("Create Task", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = if (title.isNotBlank()) PureWhite else SkyBluePrimary.copy(alpha = 0.5f))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp), tint = if (title.isNotBlank()) PureWhite else SkyBluePrimary.copy(alpha = 0.5f))
                 }
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val target = targetStr.toDoubleOrNull() ?: 60.0
-                    val unit = if (type == "time_based") "minutes" else "count"
-                    onAdd(title, category, type, target, unit, isFlexible)
-                },
-                enabled = title.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
-            ) {
-                Text("Create Task")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel", color = TextDarkSecondary) }
-        },
-        containerColor = PureWhite
-    )
+        }
+    }
 }
