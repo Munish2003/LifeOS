@@ -24,6 +24,8 @@ import com.personal.lifeos.ui.screens.routine.RoutineAvailabilityScreen
 import com.personal.lifeos.ui.screens.tasks.TasksScreen
 import com.personal.lifeos.ui.screens.timer.FocusTimerScreen
 import com.personal.lifeos.ui.theme.LifeOSTheme
+import com.personal.lifeos.ui.screens.splash.SplashScreen
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,21 +55,33 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
 fun MainAppNavigation() {
     val navController = rememberNavController()
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry.value?.destination?.route
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            LifeOsBottomBar(navController = navController)
+            if (currentRoute != Screen.Splash.route) {
+                LifeOsBottomBar(navController = navController)
+            }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Splash.route,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Splash.route) {
+                SplashScreen(onNavigateNext = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                })
+            }
             composable(Screen.Home.route) {
                 HomeDashboardScreen(
                     onNavigateToTimer = { taskTitle ->

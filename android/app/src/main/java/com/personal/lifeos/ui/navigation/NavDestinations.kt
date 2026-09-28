@@ -16,6 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.personal.lifeos.ui.theme.*
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
+    object Splash : Screen("splash", "Splash", Icons.Default.Home)
     object Home : Screen("home", "Home", Icons.Default.Home)
     object Tasks : Screen("tasks", "Tasks", Icons.Default.CheckCircle)
     object Health : Screen("health", "Health", Icons.Default.DirectionsWalk)

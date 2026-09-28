@@ -212,6 +212,90 @@ fun HomeDashboardScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // 24-HOUR HOURLY ACTIVITY CHART (Noise / Google Fit Style)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = OffWhite),
+                border = CardDefaults.outlinedCardBorder().copy(brush = Brush.linearGradient(listOf(CardBorderLight, Color.Transparent)))
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "HOURLY ACTIVITY DISTRIBUTION",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SkyBluePrimary,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = "Today's Timeline",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextMuted
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Bars
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        // Mock 24 hours of data
+                        val hourHeights = listOf(
+                            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, // Midnight to 5 AM
+                            0.3f, 0.6f, 0.8f, 0.4f, 0.2f, 0.5f, // 6 AM to 11 AM
+                            0.7f, 1.0f, 0.8f, 0.3f, 0.4f, 0.9f, // 12 PM to 5 PM
+                            0.6f, 0.8f, 0.5f, 0.2f, 0.1f, 0.0f  // 6 PM to 11 PM
+                        )
+                        
+                        hourHeights.forEachIndexed { index, fillPct ->
+                            val currentHour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+                            val isCurrent = index == currentHour
+                            val barColor = if (isCurrent) SkyBlueVibrant else if (fillPct > 0) SkyBluePrimary else SkyBlueSurface
+                            
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 2.dp)
+                                    .fillMaxHeight(if (fillPct > 0) fillPct else 0.05f)
+                                    .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                    .background(barColor)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // X-Axis Labels
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        listOf("00:00", "06:00", "12:00", "18:00", "23:59").forEach { time ->
+                            Text(
+                                text = time,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TextMuted,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Text(
                 text = "REAL-TIME TRACKING",
                 style = MaterialTheme.typography.labelSmall,
