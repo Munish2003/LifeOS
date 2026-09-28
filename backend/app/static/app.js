@@ -194,20 +194,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const toast = document.getElementById('toast');
 
-  // --- CRAZY MOTION DESIGN SPLASH SCREEN CONTROLLER ---
+  // --- MINIMALIST LUXURY SPLASH SCREEN CONTROLLER ---
   function triggerSplashScreen() {
     if (!appSplashScreen) return;
     appSplashScreen.classList.remove('fade-out');
     if (splashLoaderBar) splashLoaderBar.style.width = '0%';
-    if (splashPctNum) splashPctNum.textContent = '0%';
-    if (splashTelemetry) splashTelemetry.textContent = 'Initializing neural core & local DB...';
-    if (splashSubTelemetry) splashSubTelemetry.textContent = 'Sensors active: Google Fit & Health Connect';
+    if (splashTelemetry) splashTelemetry.textContent = 'Calibrating system...';
 
     const steps = [
-      { pct: 25, main: 'Connecting Google Fit & physical sensors...', sub: 'Sensors linked: 200Hz Hardware Telemetry' },
-      { pct: 55, main: 'Loading habits & consistency matrix...', sub: 'Neural weights active • 6-day streak verified' },
-      { pct: 85, main: 'Optimizing deterministic priority queues...', sub: '3 High focus blocks planned for today' },
-      { pct: 100, main: 'Life OS operational. All telemetry live.', sub: 'Zero dummy baseline • Hardware encrypted' }
+      { pct: 35, text: 'Syncing biometric baseline...' },
+      { pct: 75, text: 'Aligning focus habits...' },
+      { pct: 100, text: 'Ready' }
     ];
 
     let currentStep = 0;
@@ -215,17 +212,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentStep < steps.length) {
         const s = steps[currentStep];
         if (splashLoaderBar) splashLoaderBar.style.width = `${s.pct}%`;
-        if (splashPctNum) splashPctNum.textContent = `${s.pct}%`;
-        if (splashTelemetry) splashTelemetry.textContent = s.main;
-        if (splashSubTelemetry) splashSubTelemetry.textContent = s.sub;
+        if (splashTelemetry) splashTelemetry.textContent = s.text;
         currentStep++;
       } else {
         clearInterval(interval);
         setTimeout(() => {
           appSplashScreen.classList.add('fade-out');
-        }, 360);
+        }, 320);
       }
-    }, 240);
+    }, 260);
   }
 
   btnReplaySplash?.addEventListener('click', triggerSplashScreen);
@@ -389,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
       valBadge.textContent = `${(item.steps / 1000).toFixed(1)}k`;
       valBadge.style.fontSize = '9px';
       valBadge.style.fontWeight = '700';
-      valBadge.style.color = item.isToday ? '#00F2FE' : (item.steps >= 10000 ? '#38BDF8' : 'var(--text-muted)');
+      valBadge.style.color = item.isToday ? '#38BDF8' : (item.steps >= 10000 ? '#38BDF8' : 'var(--text-muted)');
 
       const bar = document.createElement('div');
       bar.style.width = '100%';
@@ -399,8 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const pct = Math.min(100, Math.max(16, (item.steps / 10000) * 100));
 
       if (item.isToday) {
-        bar.style.background = 'linear-gradient(180deg, #00F2FE 0%, #0284C7 100%)';
-        bar.style.boxShadow = '0 0 12px rgba(0, 242, 254, 0.45)';
+        bar.style.background = 'linear-gradient(180deg, #38BDF8 0%, #0284C7 100%)';
+        bar.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.35)';
       } else if (item.steps >= 10000) {
         bar.style.background = 'linear-gradient(180deg, #38BDF8 0%, #0F172A 100%)';
         bar.style.border = '1px solid rgba(56, 189, 248, 0.5)';

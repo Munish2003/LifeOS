@@ -42,74 +42,55 @@
   <!-- Device Frame Container -->
   <main class="device-wrapper">
     <div class="phone-frame" id="phone-frame">
-      <!-- CRAZY MOTION DESIGN LOADING / LAUNCH SCREEN -->
+      <!-- MINIMALIST LUXURY LAUNCH / SPLASH SCREEN -->
       <div class="splash-screen" id="app-splash-screen">
-        <div class="motion-grid-backdrop"></div>
-        <div class="motion-scanline"></div>
-        <div class="splash-ambient-halo"></div>
+        <div class="splash-ambient-aura"></div>
 
-        <!-- 3D Dual-Gyroscope Orbital Energy Rings -->
-        <div class="motion-gyro-stage">
-          <div class="gyro-ring gyro-outer"></div>
-          <div class="gyro-ring gyro-middle"></div>
-          <div class="gyro-ring gyro-inner"></div>
-          <div class="gyro-radar-sweep"></div>
-          <div class="gyro-core">
-            <svg viewBox="0 0 24 24" width="38" height="38" class="gyro-icon">
-              <path fill="url(#motion-cyan-grad)" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              <defs>
-                <linearGradient id="motion-cyan-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#00F2FE" />
-                  <stop offset="50%" stop-color="#38BDF8" />
-                  <stop offset="100%" stop-color="#0EA5E9" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div class="gyro-pulse-dot"></div>
-          </div>
-        </div>
-
-        <div class="splash-titles">
-          <div class="motion-badge-row">
-            <span class="motion-chip">NEURAL OS v2.4</span>
-            <span class="motion-chip-live">LIVE TELEMETRY</span>
-          </div>
-          <h1 class="splash-brand-title">LIFE OS</h1>
-          <p class="splash-brand-sub">Autonomous Human Performance Engine</p>
-        </div>
-
-        <!-- Kinetic Cyberpunk Telemetry Feed -->
-        <div class="motion-telemetry-feed" id="motion-telemetry-feed">
-          <div class="telemetry-row">
-            <span class="tel-tag">[CORE]</span>
-            <span class="tel-msg" id="splash-telemetry">Initializing neural core & local DB...</span>
-          </div>
-          <div class="telemetry-row tel-dim">
-            <span class="tel-tag">[HARDWARE]</span>
-            <span class="tel-msg" id="splash-sub-telemetry">Sensors active: Google Fit & Health Connect</span>
-          </div>
-        </div>
-
-        <!-- Animated Progress Meter & Frequency Equalizer -->
-        <div class="motion-progress-section">
-          <div class="splash-loader-bar-wrap">
-            <div class="splash-loader-bar" id="splash-loader-bar"></div>
-          </div>
-          <div class="motion-meta-row">
-            <span class="tel-pct" id="splash-pct-num">0%</span>
-            <!-- 8 Bouncing Audio/Kinetic Frequency Bars -->
-            <div class="motion-eq-bars">
-              <span class="eq-bar"></span><span class="eq-bar"></span>
-              <span class="eq-bar"></span><span class="eq-bar"></span>
-              <span class="eq-bar"></span><span class="eq-bar"></span>
-              <span class="eq-bar"></span><span class="eq-bar"></span>
+        <div class="splash-center-content">
+          <!-- Precision Minimalist Monogram Emblem -->
+          <div class="splash-emblem-wrap">
+            <div class="splash-emblem-pulse-ring"></div>
+            <div class="splash-emblem-card">
+              <svg viewBox="0 0 44 44" width="36" height="36" fill="none" class="splash-emblem-icon">
+                <path d="M22 6L35 13.5V28.5L22 36L9 28.5V13.5L22 6Z" stroke="url(#splash-icon-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M22 14.5L29 18.5V26.5L22 30.5L15 26.5V18.5L22 14.5Z" fill="url(#splash-inner-grad)" fill-opacity="0.3" stroke="url(#splash-icon-grad)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="22" cy="22.5" r="2.5" fill="#38BDF8"/>
+                <defs>
+                  <linearGradient id="splash-icon-grad" x1="9" y1="6" x2="35" y2="36" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#FFFFFF"/>
+                    <stop offset="0.5" stop-color="#93C5FD"/>
+                    <stop offset="1" stop-color="#38BDF8"/>
+                  </linearGradient>
+                  <linearGradient id="splash-inner-grad" x1="15" y1="14.5" x2="29" y2="30.5" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#38BDF8"/>
+                    <stop offset="1" stop-color="#1E3A8A"/>
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
-            <span class="tel-status">256-BIT ENCRYPTED</span>
+          </div>
+
+          <!-- Classy Typography -->
+          <div class="splash-brand-block">
+            <h1 class="splash-brand-title">LIFE OS</h1>
+            <p class="splash-brand-sub">Autonomous Personal Intelligence</p>
+          </div>
+
+          <!-- Minimalist Hairline Progress Indicator -->
+          <div class="splash-indicator-block">
+            <div class="splash-hairline-track">
+              <div class="splash-hairline-fill" id="splash-loader-bar"></div>
+            </div>
+            <div class="splash-status-text" id="splash-telemetry">Calibrating system...</div>
           </div>
         </div>
 
-        <div class="splash-footer">
-          <span>ZERO DUMMY BASELINE • HARDWARE CONNECTED • PRIVACY SECURED</span>
+        <!-- Silent hooks preserved for JS controllers -->
+        <span id="splash-pct-num" class="splash-silent-node" aria-hidden="true"></span>
+        <span id="splash-sub-telemetry" class="splash-silent-node" aria-hidden="true"></span>
+
+        <div class="splash-bottom-brand">
+          <span>PEAK HUMAN PERFORMANCE</span>
         </div>
       </div>
 

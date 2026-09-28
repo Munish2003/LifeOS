@@ -190,7 +190,7 @@ class GoogleFitManager(private val context: Context) {
                 response.records.sumOf { it.energy.inKilocalories }
             } catch (e: Exception) {
                 0.0
-            }
+            }                                     
         }
     }
 
