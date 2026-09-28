@@ -176,6 +176,7 @@ fun TasksScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskFilterTabs(currentFilter: String, onFilterSelected: (String) -> Unit, modifier: Modifier = Modifier) {
     Row(
