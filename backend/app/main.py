@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.api.v1.api import api_router
@@ -25,14 +27,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount API routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-
-@app.get("/")
-def root():
-    return {
-        "status": "online",
-        "app": settings.PROJECT_NAME,
-        "docs_url": "/docs",
-        "api_v1": settings.API_V1_STR
-    }
+# Mount static files and Web Simulator UI
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="web_simulator")

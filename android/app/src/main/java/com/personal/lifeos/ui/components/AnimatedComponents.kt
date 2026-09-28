@@ -350,3 +350,70 @@ fun SkyNextActionCard(
         }
     }
 }
+
+/**
+ * Three animated bouncing dots loader for async operations
+ */
+@Composable
+fun BouncingDotsLoader(
+    modifier: Modifier = Modifier,
+    color: Color = PureWhite,
+    dotSize: Dp = 8.dp
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "dots")
+    val dot1Offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "d1"
+    )
+    val dot2Offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(400, delayMillis = 150, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "d2"
+    )
+    val dot3Offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(400, delayMillis = 300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "d3"
+    )
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .offset(y = dot1Offset.dp)
+                .size(dotSize)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Box(
+            modifier = Modifier
+                .offset(y = dot2Offset.dp)
+                .size(dotSize)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Box(
+            modifier = Modifier
+                .offset(y = dot3Offset.dp)
+                .size(dotSize)
+                .clip(CircleShape)
+                .background(color)
+        )
+    }
+}

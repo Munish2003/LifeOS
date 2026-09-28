@@ -61,11 +61,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
                 val fitSteps = googleFitManager.readTodaySteps()
-                if (fitSteps > 0) {
-                    repository.updateSteps(fitSteps.toInt())
-                }
+                repository.updateSteps(fitSteps.toInt())
                 googleFitManager.setConnected(true)
-                onResult(true, "Successfully synced ${fitSteps} steps from Google Fit!")
+                if (fitSteps > 0) {
+                    onResult(true, "Successfully synced ${fitSteps} actual steps from Google Fit!")
+                } else {
+                    onResult(true, "Google Fit synced. 0 steps recorded so far today.")
+                }
             } catch (e: Exception) {
                 onResult(false, "Google Fit sync error: ${e.message}")
             }

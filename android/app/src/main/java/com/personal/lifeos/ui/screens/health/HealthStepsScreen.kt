@@ -2,9 +2,7 @@ package com.personal.lifeos.ui.screens.health
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -47,7 +45,6 @@ fun HealthStepsScreen(
     val googleFitManager = remember { homeViewModel.googleFitManager }
     var isFitConnected by remember { mutableStateOf(googleFitManager.isConnected()) }
     var isSyncing by remember { mutableStateOf(false) }
-    var syncStatusText by remember { mutableStateOf<String?>(null) }
     var showSetupDialog by remember { mutableStateOf(false) }
     var showWeightDialog by remember { mutableStateOf(false) }
     var currentWeight by remember { mutableStateOf(79.5) }
@@ -63,21 +60,20 @@ fun HealthStepsScreen(
                 isSyncing = true
                 homeViewModel.syncGoogleFit { success, msg ->
                     isSyncing = false
-                    syncStatusText = msg
                     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                 }
             } else {
-                Toast.makeText(context, "Permissions granted partially or cancelled.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Google Fit permissions not granted.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
+    // Auto-sync actual steps from Google Fit when opening screen if connected
     LaunchedEffect(Unit) {
         if (googleFitManager.isConnected()) {
             isSyncing = true
-            homeViewModel.syncGoogleFit { _, msg ->
+            homeViewModel.syncGoogleFit { _, _ ->
                 isSyncing = false
-                syncStatusText = msg
             }
         }
     }
@@ -120,7 +116,7 @@ fun HealthStepsScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // GOOGLE FIT INTEGRATION CARD
+            // GOOGLE FIT REAL INTEGRATION CARD
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -140,7 +136,7 @@ fun HealthStepsScreen(
                                 modifier = Modifier
                                     .size(38.dp)
                                     .clip(CircleShape)
-                                    .background(SkyTint),
+                                    .background(SkyBlueSurface),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -159,7 +155,7 @@ fun HealthStepsScreen(
                                     color = TextDarkPrimary
                                 )
                                 Text(
-                                    text = if (isFitConnected) "🟢 Connected & Syncing" else "⚪ Not Connected",
+                                    text = if (isFitConnected) "🟢 Connected to Google Fit" else "⚪ Not Connected",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.SemiBold,
                                     color = if (isFitConnected) EmeraldSuccess else TextMuted
@@ -188,9 +184,9 @@ fun HealthStepsScreen(
                             val timeStr = if (lastSync > 0) {
                                 SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(lastSync))
                             } else "Just now"
-                            "Synced with Google Fit & Health Connect. Last update at $timeStr."
+                            "Live sync active with Google Fit. Actual steps update whenever you sync or walk."
                         } else {
-                            "Connect Google Fit to automatically synchronize your real daily steps, walking distance, and workout calories."
+                            "Connect Google Fit to automatically synchronize your actual real-world steps and activity from your phone and smartwatch."
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = TextDarkSecondary,
@@ -228,9 +224,9 @@ fun HealthStepsScreen(
                             Button(
                                 onClick = {
                                     isSyncing = true
+                                    // Fetch actual live steps from Google Fit / Health Connect API
                                     homeViewModel.syncGoogleFit { success, msg ->
                                         isSyncing = false
-                                        syncStatusText = msg
                                         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                                     }
                                 },
@@ -244,7 +240,7 @@ fun HealthStepsScreen(
                                 } else {
                                     Icon(Icons.Default.Sync, contentDescription = "Sync", modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Sync Now", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                    Text("Sync Actual Steps", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 }
                             }
                         }
@@ -252,7 +248,7 @@ fun HealthStepsScreen(
                         OutlinedButton(
                             onClick = { showSetupDialog = true },
                             shape = RoundedCornerShape(12.dp),
-                            border = ButtonDefaults.outlinedButtonBorder.copy(brush = Brush.linearGradient(listOf(SkyBluePrimary, SkyBlueVariant))),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(brush = Brush.linearGradient(listOf(SkyBluePrimary, SkyBlueVibrant))),
                             modifier = Modifier.height(44.dp)
                         ) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings", tint = SkyBluePrimary, modifier = Modifier.size(18.dp))
@@ -263,7 +259,7 @@ fun HealthStepsScreen(
                 }
             }
 
-            // MAIN STEPS CARD WITH INFINITE ROTATING AURA
+            // ACTUAL STEPS PROGRESS CARD (REAL HARDWARE + GOOGLE FIT)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -288,7 +284,7 @@ fun HealthStepsScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (isFitConnected) "GOOGLE FIT + SENSOR LIVE" else "HARDWARE PEDOMETER ACTIVE",
+                            text = if (isFitConnected) "GOOGLE FIT LIVE SYNC" else "HARDWARE PEDOMETER ACTIVE",
                             style = MaterialTheme.typography.labelSmall,
                             color = SkyBluePrimary,
                             fontWeight = FontWeight.Bold,
@@ -329,23 +325,6 @@ fun HealthStepsScreen(
                         SkyStatPill("Distance", String.format("%.2f km", distanceKm))
                         SkyStatPill("Calories", "${caloriesBurned.toInt()} kcal")
                         SkyStatPill("Active Time", "${activeMinutes} min")
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                homeViewModel.repository.updateSteps(state.stepsCurrent + 250)
-                            }
-                        },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SkyTint, contentColor = SkyBluePrimary),
-                        modifier = Modifier.fillMaxWidth().height(44.dp)
-                    ) {
-                        Icon(Icons.Default.DirectionsWalk, contentDescription = "Step", modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Simulate Steps (+250)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                 }
             }
@@ -409,7 +388,7 @@ fun HealthStepsScreen(
             }
         }
 
-        // GOOGLE FIT SETUP & PERMISSIONS DIALOG
+        // GOOGLE FIT SETUP GUIDE MODAL
         if (showSetupDialog) {
             AlertDialog(
                 onDismissRequest = { showSetupDialog = false },
@@ -423,25 +402,25 @@ fun HealthStepsScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
-                            text = "Google Fit syncs seamlessly with Life OS using Google's official Health platform.",
+                            text = "Google Fit synchronizes actual steps directly with Life OS via Android Health Connect.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextDarkSecondary
                         )
 
                         Card(
-                            colors = CardDefaults.cardColors(containerColor = SkyTint),
+                            colors = CardDefaults.cardColors(containerColor = SkyBlueSurface),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(
-                                    text = "Quick Setup Steps:",
+                                    text = "Setup Steps:",
                                     fontWeight = FontWeight.Bold,
                                     color = SkyBluePrimary,
                                     fontSize = 13.sp
                                 )
-                                Text("1. Ensure Google Fit app is installed on your phone.", fontSize = 12.sp, color = TextDarkPrimary)
-                                Text("2. In Google Fit -> Settings -> enable 'Sync Fit with Health Connect'.", fontSize = 12.sp, color = TextDarkPrimary)
-                                Text("3. Grant Life OS permission to read Steps & Activities.", fontSize = 12.sp, color = TextDarkPrimary)
+                                Text("1. Open Google Fit app on your device.", fontSize = 12.sp, color = TextDarkPrimary)
+                                Text("2. Go to Profile -> Settings -> enable 'Sync Fit with Health Connect'.", fontSize = 12.sp, color = TextDarkPrimary)
+                                Text("3. Tap below to grant permission to read your actual steps.", fontSize = 12.sp, color = TextDarkPrimary)
                             }
                         }
 
@@ -483,21 +462,6 @@ fun HealthStepsScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
                         ) {
                             Text("Grant Health Permissions", fontWeight = FontWeight.Bold)
-                        }
-
-                        TextButton(
-                            onClick = {
-                                googleFitManager.setConnected(true)
-                                isFitConnected = true
-                                scope.launch {
-                                    homeViewModel.repository.updateSteps(state.stepsCurrent + 1000)
-                                }
-                                Toast.makeText(context, "Linked Google Fit & synced steps!", Toast.LENGTH_SHORT).show()
-                                showSetupDialog = false
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Test / Force Connect (+1,000 steps)", color = SkyBluePrimary, fontSize = 12.sp)
                         }
                     }
                 },

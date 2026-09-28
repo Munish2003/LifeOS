@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Life OS — Personal AI Operating System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Top Viewport Control Bar -->
+  <header class="preview-toolbar">
+    <div class="toolbar-brand">
+      <span class="pulse-indicator"></span>
+      <span class="brand-title">Life OS Mobile Simulator</span>
+      <span class="brand-tag">Sky Blue & White Edition</span>
+    </div>
+    <div class="toolbar-actions">
+      <div class="device-toggle">
+        <button id="btn-phone-mode" class="toggle-btn active" title="Mobile Phone Mockup">📱 Phone Frame</button>
+        <button id="btn-full-mode" class="toggle-btn" title="Full Screen View">🖥️ Full Canvas</button>
+      </div>
+      <a href="/docs" target="_blank" class="api-docs-link">FastAPI Docs ↗</a>
+    </div>
+  </header>
+
+  <!-- Device Frame Container -->
+  <main class="device-wrapper">
+    <div class="phone-frame" id="phone-frame">
+      <!-- Phone Bezel & Hardware Elements -->
+      <div class="phone-notch">
+        <div class="camera-lens"></div>
+        <div class="speaker-grill"></div>
+      </div>
+      <div class="phone-status-bar">
+        <span class="status-time" id="status-time">11:30</span>
+        <div class="status-icons">
+          <svg class="status-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+          <svg class="status-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+          <svg class="status-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+        </div>
+      </div>
+
+      <!-- Scrollable App Screen Content -->
+      <div class="app-screen" id="app-screen">
+
+        <!-- ================= TAB 1: HOME DASHBOARD ================= -->
+        <section id="tab-home" class="screen-tab active">
+          <!-- Top App Bar -->
+          <div class="screen-header">
+            <div>
+              <p class="greeting-sub" id="greeting-text">Good morning, Munish</p>
+              <h1 class="screen-title">Life OS Today</h1>
+            </div>
+            <div class="header-action-badge">
+              <span class="live-dot"></span>
+              <span id="header-fit-badge">Pedometer Live</span>
+            </div>
+          </div>
+
+          <!-- Hero: Daily Life Score with Continuous Rotating Aura Ring -->
+          <div class="card hero-score-card">
+            <div class="hero-info">
+              <span class="section-label">DAILY LIFE SCORE</span>
+              <div class="hero-score-val" id="home-overall-pct">0%</div>
+              <div class="availability-pill">
+                <span class="pill-dot"></span>
+                <span id="home-avail-text">2h 30m usable focus time</span>
+              </div>
+            </div>
+
+            <!-- Rotating Aura Ring Container -->
+            <div class="aura-container">
+              <div class="rotating-aura-halo"></div>
+              <div class="aura-inner-ring">
+                <svg viewBox="0 0 100 100" class="progress-svg">
+                  <circle class="track" cx="50" cy="50" r="40" />
+                  <circle class="fill" id="home-progress-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                </svg>
+                <span class="aura-percent-text" id="home-aura-pct">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pulsating Recommended Next-Action Card -->
+          <div class="card pulsating-action-card" id="pulsating-action-card">
+            <div class="card-badge-row">
+              <span class="ai-badge">⚡ AI RECOMMENDED NEXT ACTION</span>
+              <span class="time-est-badge" id="action-rem-mins">45 min</span>
+            </div>
+            <h2 class="action-task-title" id="action-task-title">Python Deep Work</h2>
+            <p class="action-reason" id="action-task-reason">Optimal focus window available right now before scheduled evening dinner.</p>
+            <div class="action-btn-row">
+              <button class="btn btn-primary" id="btn-start-next-timer">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+                <span>Start Focus Timer</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Real-Time Activity Tracking Section -->
+          <div class="section-heading">
+            <span>REAL-TIME TRACKING</span>
+            <span class="badge-status" id="fit-sync-indicator">Google Fit Ready</span>
+          </div>
+
+          <div class="metrics-grid">
+            <!-- Google Fit Steps Card -->
+            <div class="card metric-card" id="card-steps-shortcut">
+              <div class="metric-top">
+                <span class="metric-name" id="home-steps-title">Google Fit Steps</span>
+                <div class="metric-icon-box bg-cyan">
+                  <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
+                </div>
+              </div>
+              <div class="metric-values">
+                <span class="metric-current" id="home-steps-current">0</span>
+                <span class="metric-target">/ 10,000 steps</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill bg-cyan-gradient" id="home-steps-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Diet & Nutrition Card -->
+            <div class="card metric-card" id="card-food-shortcut">
+              <div class="metric-top">
+                <span class="metric-name">Diet & Calories</span>
+                <div class="metric-icon-box bg-amber">
+                  <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
+                </div>
+              </div>
+              <div class="metric-values">
+                <span class="metric-current" id="home-calories-current">0</span>
+                <span class="metric-target">/ 1,200 kcal</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill bg-amber-gradient" id="home-calories-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Priority Tasks -->
+          <div class="section-heading">
+            <span>TODAY'S CRITICAL TASKS</span>
+            <button class="link-btn" id="btn-view-all-tasks">View All ↗</button>
+          </div>
+          <div class="task-list" id="home-task-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 2: TASKS & PRIORITIES ================= -->
+        <section id="tab-tasks" class="screen-tab">
+          <div class="screen-header">
+            <div>
+              <p class="greeting-sub">Deterministic Priority Engine</p>
+              <h1 class="screen-title">Tasks & Work</h1>
+            </div>
+            <button class="icon-round-btn" id="btn-add-task-modal">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+          </div>
+
+          <div class="task-filter-tabs">
+            <button class="filter-chip active" data-filter="all">All Tasks</button>
+            <button class="filter-chip" data-filter="P1">Critical (P1)</button>
+            <button class="filter-chip" data-filter="P2">High (P2)</button>
+            <button class="filter-chip" data-filter="P3">Normal (P3)</button>
+          </div>
+
+          <div class="task-list full-list" id="tasks-full-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 3: FOCUS TIMER ================= -->
+        <section id="tab-timer" class="screen-tab">
+          <div class="screen-header">
+            <div>
+              <p class="greeting-sub">Deep Focus & Pomodoro</p>
+              <h1 class="screen-title">Focus Chamber</h1>
+            </div>
+            <span class="focus-status-chip" id="timer-mode-tag">Deep Work</span>
+          </div>
+
+          <div class="timer-center-stage">
+            <div class="timer-circle-wrap">
+              <div class="timer-ambient-glow"></div>
+              <svg viewBox="0 0 200 200" class="timer-svg">
+                <circle class="timer-track" cx="100" cy="100" r="85" />
+                <circle class="timer-fill" id="timer-stroke" cx="100" cy="100" r="85" stroke-dasharray="534" stroke-dashoffset="0" />
+              </svg>
+              <div class="timer-display">
+                <span class="timer-digits" id="timer-countdown">25:00</span>
+                <span class="timer-task-label" id="timer-active-task-title">Python Deep Work</span>
+              </div>
+            </div>
+
+            <div class="timer-controls">
+              <button class="control-btn secondary" id="btn-timer-reset" title="Reset">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+              </button>
+              <button class="control-btn primary large" id="btn-timer-toggle">
+                <svg id="icon-timer-play" viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+                <svg id="icon-timer-pause" class="hidden" viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              </button>
+              <button class="control-btn secondary" id="btn-timer-complete" title="Mark Done">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              </button>
+            </div>
+
+            <div class="timer-presets">
+              <button class="preset-btn active" data-mins="25">25m Pomodoro</button>
+              <button class="preset-btn" data-mins="45">45m Deep Work</button>
+              <button class="preset-btn" data-mins="60">60m Power Sprint</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 4: HEALTH & GOOGLE FIT ================= -->
+        <section id="tab-health" class="screen-tab">
+          <div class="screen-header">
+            <div>
+              <p class="greeting-sub">Google Fit & Hardware Pedometer</p>
+              <h1 class="screen-title">Health & Steps</h1>
+            </div>
+            <button class="icon-round-btn" id="btn-open-fit-setup" title="Google Fit Setup Guide">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+            </button>
+          </div>
+
+          <!-- GOOGLE FIT INTEGRATION CARD -->
+          <div class="card google-fit-card">
+            <div class="fit-card-header">
+              <div class="fit-logo-box">
+                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="#0284C7" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
+              </div>
+              <div class="fit-header-texts">
+                <span class="fit-brand-name">Google Fit Integration</span>
+                <span class="fit-status-text" id="fit-status-label">🟢 Connected & Syncing</span>
+              </div>
+              <button class="fit-external-btn" id="btn-launch-fit" title="Open Google Fit App">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+              </button>
+            </div>
+
+            <p class="fit-card-description" id="fit-desc-text">
+              Directly synchronized with Google Fit & Android Health Connect. Live steps, distance, and burned calories reflect here automatically.
+            </p>
+
+            <div class="fit-action-row">
+              <button class="btn btn-primary" id="btn-sync-fit-now">
+                <svg class="sync-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                <span id="sync-fit-btn-text">Sync Now (Google Fit)</span>
+              </button>
+              <button class="btn btn-outline" id="btn-fit-toggle-connect">
+                <span id="fit-toggle-btn-text">Connected</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Steps Aura Ring Card -->
+          <div class="card steps-ring-card">
+            <span class="card-kicker" id="steps-card-badge">GOOGLE FIT + SENSOR ACTIVE</span>
+            
+            <div class="aura-container large-aura">
+              <div class="rotating-aura-halo"></div>
+              <div class="aura-inner-ring large-ring">
+                <svg viewBox="0 0 120 120" class="progress-svg">
+                  <circle class="track" cx="60" cy="60" r="50" />
+                  <circle class="fill" id="health-progress-fill" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314" />
+                </svg>
+                <div class="steps-center-content">
+                  <span class="steps-big-number" id="health-steps-number">0</span>
+                  <span class="steps-goal-label">of 10,000 steps</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Health Stat Pills -->
+            <div class="stats-pills-row">
+              <div class="stat-pill">
+                <span class="stat-val" id="health-distance">0.00 km</span>
+                <span class="stat-lbl">Distance</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-val" id="health-calories">0 kcal</span>
+                <span class="stat-lbl">Calories</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-val" id="health-active-time">0 min</span>
+                <span class="stat-lbl">Active Time</span>
+              </div>
+            </div>
+
+            <div class="sync-status-banner">
+              <span class="banner-icon">📡</span>
+              <span class="banner-text" id="sync-banner-text">Tracking actual steps from Google Fit and phone hardware sensor.</span>
+            </div>
+          </div>
+
+          <!-- Weight & Target Card -->
+          <div class="card weight-card">
+            <div class="card-header-row">
+              <span class="section-label">WEIGHT & TARGET</span>
+              <button class="icon-tiny-btn" id="btn-edit-weight">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+              </button>
+            </div>
+            <div class="weight-row">
+              <div>
+                <span class="weight-number" id="weight-current-val">79.5 kg</span>
+                <span class="weight-sub">Current Weight</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="24" height="24" class="arrow-accent"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              <div class="text-right">
+                <span class="weight-number text-success">75.0 kg</span>
+                <span class="weight-sub">Goal Target</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 5: DIET & NUTRITION ================= -->
+        <section id="tab-food" class="screen-tab">
+          <div class="screen-header">
+            <div>
+              <p class="greeting-sub">AI Food & Macro Tracking</p>
+              <h1 class="screen-title">Diet & Fuel</h1>
+            </div>
+            <button class="icon-round-btn" id="btn-add-food-modal">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+          </div>
+
+          <!-- Calories Summary Card -->
+          <div class="card cal-summary-card">
+            <div class="cal-top-row">
+              <div>
+                <span class="section-label">CALORIE INTAKE</span>
+                <div class="cal-large-num" id="food-total-cals">0 <span class="cal-unit">kcal</span></div>
+                <span class="cal-goal-sub">Budget: 1,200 kcal</span>
+              </div>
+              <div class="macro-donut-box">
+                <svg viewBox="0 0 80 80" class="mini-donut">
+                  <circle cx="40" cy="40" r="30" class="track"/>
+                  <circle cx="40" cy="40" r="30" class="fill" id="food-donut-fill" stroke-dasharray="188.4" stroke-dashoffset="188.4"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Natural Language Quick Add Card -->
+          <div class="card quick-food-card">
+            <span class="section-label">QUICK AI MEAL LOG</span>
+            <div class="food-input-row">
+              <input type="text" id="nl-food-input" class="modern-input" placeholder="e.g. 2 eggs and 1 glass milk">
+              <button class="btn btn-primary btn-sm" id="btn-log-nl-food">Log</button>
+            </div>
+          </div>
+
+          <div class="section-heading">
+            <span>TODAY'S LOGGED MEALS</span>
+          </div>
+          <div class="food-entries-list" id="food-entries-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 6: AI COMPANION ================= -->
+        <section id="tab-ai" class="screen-tab">
+          <div class="screen-header">
+            <div>
+              <p class="greeting-sub">Personal Life Coach & Planner</p>
+              <h1 class="screen-title">AI Companion</h1>
+            </div>
+            <button class="icon-round-btn" id="btn-open-ai-settings" title="AI Inference Settings">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </button>
+          </div>
+
+          <!-- Chat Window -->
+          <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+              <div class="chat-bubble ai">
+                <div class="ai-avatar">🤖</div>
+                <div class="bubble-content">
+                  <p>Namaste Munish! Main aapka Personal AI Life Coach hu. Aapka schedule, steps, priority tasks aur nutrition mere radar par hai. Aaj aap kya plan karna chahte hain?</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Prompt Pills -->
+            <div class="quick-prompts">
+              <button class="prompt-chip" data-prompt="How is my day looking today?">📊 Today's Schedule</button>
+              <button class="prompt-chip" data-prompt="What should I do in my next focus window?">⚡ Next Best Action</button>
+              <button class="prompt-chip" data-prompt="How are my steps and Google Fit sync?">🏃 Steps Progress</button>
+            </div>
+
+            <!-- Chat Input Box -->
+            <div class="chat-input-bar">
+              <input type="text" id="chat-input" class="chat-input" placeholder="Ask AI Companion anything...">
+              <button id="btn-send-chat" class="send-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- End app-screen -->
+
+      <!-- Bottom Navigation Bar (Sky Blue Active Icons) -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="tab-home">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-tab="tab-tasks">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+          <span class="nav-label">Tasks</span>
+        </button>
+        <button class="nav-item" data-tab="tab-timer">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+          <span class="nav-label">Timer</span>
+        </button>
+        <button class="nav-item" data-tab="tab-health">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
+          <span class="nav-label">Health</span>
+        </button>
+        <button class="nav-item" data-tab="tab-food">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
+          <span class="nav-label">Food</span>
+        </button>
+        <button class="nav-item" data-tab="tab-ai">
+          <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+          <span class="nav-label">AI</span>
+        </button>
+      </nav>
+
+      <!-- Bottom Home Indicator Bar -->
+      <div class="home-indicator"></div>
+    </div>
+  </main>
+
+  <!-- Google Fit Setup & Permissions Modal -->
+  <div class="modal-backdrop hidden" id="modal-fit-setup">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="fit-modal-title">
+          <div class="fit-modal-icon">🏃</div>
+          <h3>Google Fit & Health Connect</h3>
+        </div>
+        <button class="modal-close-btn" id="btn-close-fit-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-subtitle">Connect Google Fit to automatically sync your daily steps, walking workouts, and active calories.</p>
+        
+        <div class="steps-guide-card">
+          <div class="guide-step">
+            <span class="step-num">1</span>
+            <div>
+              <strong>Install Google Fit & Health Connect</strong>
+              <p>Google Fit syncs via Android Health Connect on modern devices.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <span class="step-num">2</span>
+            <div>
+              <strong>Enable Health Connect in Google Fit</strong>
+              <p>In Google Fit &rarr; Profile &rarr; Settings &rarr; Turn ON <em>"Sync Fit with Health Connect"</em>.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <span class="step-num">3</span>
+            <div>
+              <strong>Grant Life OS Access</strong>
+              <p>Allow Life OS to read Steps & Activity data.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions-col">
+          <button class="btn btn-primary" id="btn-modal-grant-perms">Grant Health Permissions</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Task Modal -->
+  <div class="modal-backdrop hidden" id="modal-add-task">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Create New Task</h3>
+        <button class="modal-close-btn" id="btn-close-task-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" id="new-task-title" class="modern-input" placeholder="e.g. Solve LeetCode DP Problems">
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="new-task-priority" class="modern-input">
+            <option value="P1">P1 — Critical (High Urgency)</option>
+            <option value="P2" selected>P2 — High (Important)</option>
+            <option value="P3">P3 — Medium (Normal)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estimated Minutes</label>
+          <input type="number" id="new-task-mins" class="modern-input" value="45" min="5" max="300">
+        </div>
+        <button class="btn btn-primary btn-block" id="btn-submit-task">Create Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Settings Modal -->
+  <div class="modal-backdrop hidden" id="modal-ai-settings">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>AI Companion Config</h3>
+        <button class="modal-close-btn" id="btn-close-ai-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Hugging Face API Token</label>
+          <input type="password" id="hf-token-input" class="modern-input" placeholder="hf_... (Optional for cloud LLM)">
+          <small class="form-help">Enter your token to use Llama 3.2 directly. If left blank, the built-in life coach engine operates locally.</small>
+        </div>
+        <div class="form-group">
+          <label>Backend URL</label>
+          <input type="text" id="backend-url-input" class="modern-input" value="http://localhost:8000">
+        </div>
+        <button class="btn btn-primary btn-block" id="btn-save-ai-config">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

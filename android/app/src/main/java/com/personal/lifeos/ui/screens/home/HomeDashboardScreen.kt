@@ -223,7 +223,7 @@ fun HomeDashboardScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Steps Metric Card (Google Fit / Real hardware sensor)
-            val isFitLinked = remember { homeViewModel.googleFitManager.isConnected() }
+            val isFitLinked = remember { viewModel.googleFitManager.isConnected() }
             SkyMetricCard(
                 title = if (isFitLinked) "Google Fit Steps" else "Daily Steps",
                 currentFormatted = String.format("%,d", state.stepsCurrent),

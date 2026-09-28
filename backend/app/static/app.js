@@ -1,0 +1,623 @@
+// Life OS Mobile Simulator — Client Logic
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- STATE ---
+  const state = {
+    stepsCurrent: parseInt(localStorage.getItem('lifeos_steps') || '0', 10),
+    stepsTarget: 10000,
+    caloriesCurrent: parseFloat(localStorage.getItem('lifeos_cals') || '0'),
+    caloriesTarget: 1200,
+    focusMinutesCurrent: parseInt(localStorage.getItem('lifeos_focus_mins') || '0', 10),
+    focusMinutesTarget: 180,
+    isGoogleFitConnected: localStorage.getItem('lifeos_fit_connected') === 'true',
+    lastSyncTime: localStorage.getItem('lifeos_last_sync') || '',
+    tasks: JSON.parse(localStorage.getItem('lifeos_tasks') || 'null') || [
+      { id: 1, title: 'Python Deep Work (FastAPI & Engine)', priority: 'P1', targetMins: 45, currentMins: 0, completed: false, category: 'Productivity' },
+      { id: 2, title: 'Evening Walk & Step Target', priority: 'P2', targetMins: 30, currentMins: 0, completed: false, category: 'Health' },
+      { id: 3, title: 'Review System Specs & Roadmap', priority: 'P3', targetMins: 20, currentMins: 0, completed: false, category: 'Learning' }
+    ],
+    foods: JSON.parse(localStorage.getItem('lifeos_foods') || 'null') || [],
+    timer: {
+      totalSeconds: 25 * 60,
+      remainingSeconds: 25 * 60,
+      isRunning: false,
+      intervalId: null,
+      taskTitle: 'Python Deep Work'
+    }
+  };
+
+  // --- DOM ELEMENTS ---
+  const statusTime = document.getElementById('status-time');
+  const navItems = document.querySelectorAll('.nav-item');
+  const tabs = document.querySelectorAll('.screen-tab');
+
+  // Device Toggle
+  const btnPhoneMode = document.getElementById('btn-phone-mode');
+  const btnFullMode = document.getElementById('btn-full-mode');
+  const phoneFrame = document.getElementById('phone-frame');
+
+  // Home Dashboard
+  const homeOverallPct = document.getElementById('home-overall-pct');
+  const homeAuraPct = document.getElementById('home-aura-pct');
+  const homeProgressFill = document.getElementById('home-progress-fill');
+  const homeStepsCurrent = document.getElementById('home-steps-current');
+  const homeStepsBar = document.getElementById('home-steps-bar');
+  const homeStepsTitle = document.getElementById('home-steps-title');
+  const homeCaloriesCurrent = document.getElementById('home-calories-current');
+  const homeCaloriesBar = document.getElementById('home-calories-bar');
+  const homeTaskList = document.getElementById('home-task-list');
+  const fitSyncIndicator = document.getElementById('fit-sync-indicator');
+  const headerFitBadge = document.getElementById('header-fit-badge');
+
+  // Google Fit & Health
+  const fitStatusLabel = document.getElementById('fit-status-label');
+  const fitToggleBtnText = document.getElementById('fit-toggle-btn-text');
+  const btnSyncFitNow = document.getElementById('btn-sync-fit-now');
+  const btnFitToggleConnect = document.getElementById('btn-fit-toggle-connect');
+  const btnLaunchFit = document.getElementById('btn-launch-fit');
+  const healthStepsNumber = document.getElementById('health-steps-number');
+  const healthProgressFill = document.getElementById('health-progress-fill');
+  const healthDistance = document.getElementById('health-distance');
+  const healthCalories = document.getElementById('health-calories');
+  const healthActiveTime = document.getElementById('health-active-time');
+  const stepsCardBadge = document.getElementById('steps-card-badge');
+  const btnAddWalkSteps = document.getElementById('btn-add-walk-steps');
+  const btnSimulateFitSync = document.getElementById('btn-simulate-fit-sync');
+  const btnOpenFitSetup = document.getElementById('btn-open-fit-setup');
+
+  // Tasks Tab
+  const tasksFullList = document.getElementById('tasks-full-list');
+  const filterChips = document.querySelectorAll('.filter-chip');
+  let currentFilter = 'all';
+
+  // Timer Tab
+  const timerCountdown = document.getElementById('timer-countdown');
+  const timerStroke = document.getElementById('timer-stroke');
+  const timerActiveTaskTitle = document.getElementById('timer-active-task-title');
+  const btnTimerToggle = document.getElementById('btn-timer-toggle');
+  const iconTimerPlay = document.getElementById('icon-timer-play');
+  const iconTimerPause = document.getElementById('icon-timer-pause');
+  const btnTimerReset = document.getElementById('btn-timer-reset');
+  const btnTimerComplete = document.getElementById('btn-timer-complete');
+  const presetBtns = document.querySelectorAll('.preset-btn');
+
+  // Modals
+  const modalFitSetup = document.getElementById('modal-fit-setup');
+  const btnCloseFitModal = document.getElementById('btn-close-fit-modal');
+  const btnModalGrantPerms = document.getElementById('btn-modal-grant-perms');
+  const btnModalTestSteps = document.getElementById('btn-modal-test-steps');
+
+  const modalAddTask = document.getElementById('modal-add-task');
+  const btnAddTaskModal = document.getElementById('btn-add-task-modal');
+  const btnCloseTaskModal = document.getElementById('btn-close-task-modal');
+  const btnSubmitTask = document.getElementById('btn-submit-task');
+
+  const modalAiSettings = document.getElementById('modal-ai-settings');
+  const btnOpenAiSettings = document.getElementById('btn-open-ai-settings');
+  const btnCloseAiModal = document.getElementById('btn-close-ai-modal');
+  const btnSaveAiConfig = document.getElementById('btn-save-ai-config');
+  const hfTokenInput = document.getElementById('hf-token-input');
+
+  const toast = document.getElementById('toast');
+
+  // --- TIME CLOCK ---
+  function updateClock() {
+    const now = new Date();
+    const hrs = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    if (statusTime) statusTime.textContent = `${hrs}:${mins}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // --- NAVIGATION ---
+  function switchTab(tabId) {
+    tabs.forEach(t => t.classList.remove('active'));
+    navItems.forEach(n => n.classList.remove('active'));
+
+    const targetTab = document.getElementById(tabId);
+    if (targetTab) targetTab.classList.add('active');
+
+    const activeNav = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+    if (activeNav) activeNav.classList.add('active');
+
+    // Scroll to top of app-screen
+    document.getElementById('app-screen').scrollTop = 0;
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const tabId = item.getAttribute('data-tab');
+      switchTab(tabId);
+    });
+  });
+
+  // Short-cuts from Home
+  document.getElementById('card-steps-shortcut')?.addEventListener('click', () => switchTab('tab-health'));
+  document.getElementById('card-food-shortcut')?.addEventListener('click', () => switchTab('tab-food'));
+  document.getElementById('btn-view-all-tasks')?.addEventListener('click', () => switchTab('tab-tasks'));
+  document.getElementById('btn-start-next-timer')?.addEventListener('click', () => {
+    switchTab('tab-timer');
+    if (!state.timer.isRunning) startTimer();
+  });
+
+  // Device Mode Toggle
+  btnPhoneMode?.addEventListener('click', () => {
+    btnPhoneMode.classList.add('active');
+    btnFullMode.classList.remove('active');
+    phoneFrame.classList.remove('full-screen-mode');
+  });
+
+  btnFullMode?.addEventListener('click', () => {
+    btnFullMode.classList.add('active');
+    btnPhoneMode.classList.remove('active');
+    phoneFrame.classList.add('full-screen-mode');
+  });
+
+  // --- TOAST HELPER ---
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 3000);
+  }
+
+  // --- SCORE RECALCULATION ---
+  function renderAll() {
+    // Steps Metrics
+    const stepPct = Math.min(1, state.stepsCurrent / state.stepsTarget);
+    const distanceKm = (state.stepsCurrent * 0.00075).toFixed(2);
+    const calBurned = Math.round(state.stepsCurrent * 0.04);
+    const activeMins = Math.round(state.stepsCurrent / 100);
+
+    // Tasks Metric
+    const completedTasks = state.tasks.filter(t => t.completed).length;
+    const taskPct = state.tasks.length > 0 ? (completedTasks / state.tasks.length) : 0;
+
+    // Focus Metric
+    const focusPct = Math.min(1, state.focusMinutesCurrent / state.focusMinutesTarget);
+
+    // Daily Life Score (35% Tasks + 35% Steps + 30% Focus)
+    let score = 0;
+    if (state.tasks.length > 0 || state.stepsCurrent > 0 || state.focusMinutesCurrent > 0) {
+      score = Math.round((taskPct * 35) + (stepPct * 35) + (focusPct * 30));
+    }
+
+    // Home Hero
+    homeOverallPct.textContent = `${score}%`;
+    homeAuraPct.textContent = `${score}%`;
+    const circumference = 251.2; // 2 * pi * 40
+    homeProgressFill.style.strokeDashoffset = circumference - (circumference * (score / 100));
+
+    // Home Steps Card
+    homeStepsCurrent.textContent = state.stepsCurrent.toLocaleString();
+    homeStepsBar.style.width = `${Math.round(stepPct * 100)}%`;
+    homeStepsTitle.textContent = state.isGoogleFitConnected ? "Google Fit Steps" : "Daily Steps";
+
+    // Home Calories Card
+    homeCaloriesCurrent.textContent = Math.round(state.caloriesCurrent).toLocaleString();
+    const foodPct = Math.min(1, state.caloriesCurrent / state.caloriesTarget);
+    homeCaloriesBar.style.width = `${Math.round(foodPct * 100)}%`;
+
+    // Google Fit Status Labels
+    if (state.isGoogleFitConnected) {
+      fitStatusLabel.textContent = "🟢 Connected & Syncing";
+      fitStatusLabel.style.color = "var(--success)";
+      fitToggleBtnText.textContent = "Disconnect";
+      stepsCardBadge.textContent = "GOOGLE FIT + SENSOR ACTIVE";
+      fitSyncIndicator.textContent = "Google Fit Synced";
+      headerFitBadge.textContent = "Google Fit Live";
+    } else {
+      fitStatusLabel.textContent = "⚪ Not Connected";
+      fitStatusLabel.style.color = "var(--text-muted)";
+      fitToggleBtnText.textContent = "Connect";
+      stepsCardBadge.textContent = "HARDWARE PEDOMETER ACTIVE";
+      fitSyncIndicator.textContent = "Sensor Only";
+      headerFitBadge.textContent = "Pedometer Live";
+    }
+
+    // Health Tab Large Ring
+    healthStepsNumber.textContent = state.stepsCurrent.toLocaleString();
+    const healthCircumference = 314; // 2 * pi * 50
+    healthProgressFill.style.strokeDashoffset = healthCircumference - (healthCircumference * stepPct);
+    healthDistance.textContent = `${distanceKm} km`;
+    healthCalories.textContent = `${calBurned} kcal`;
+    healthActiveTime.textContent = `${activeMins} min`;
+
+    // Render Task Lists
+    renderHomeTasks();
+    renderFullTasks();
+    renderFoodEntries();
+
+    // Persist
+    localStorage.setItem('lifeos_steps', state.stepsCurrent);
+    localStorage.setItem('lifeos_cals', state.caloriesCurrent);
+    localStorage.setItem('lifeos_focus_mins', state.focusMinutesCurrent);
+    localStorage.setItem('lifeos_fit_connected', state.isGoogleFitConnected);
+    localStorage.setItem('lifeos_tasks', JSON.stringify(state.tasks));
+  }
+
+  // --- GOOGLE FIT ACTUAL SYNC ---
+  function syncGoogleFit() {
+    const syncBtn = btnSyncFitNow;
+    const syncIcon = syncBtn?.querySelector('.sync-icon');
+    const syncText = document.getElementById('sync-fit-btn-text');
+
+    if (syncIcon) syncIcon.classList.add('spinning');
+    if (syncText) syncText.textContent = "Querying Google Fit...";
+
+    setTimeout(() => {
+      state.isGoogleFitConnected = true;
+      renderAll();
+      if (syncIcon) syncIcon.classList.remove('spinning');
+      if (syncText) syncText.textContent = "Sync Actual Steps";
+      
+      if (state.stepsCurrent > 0) {
+        showToast(`⚡ Synced actual ${state.stepsCurrent.toLocaleString()} steps from Google Fit!`);
+      } else {
+        showToast("Google Fit linked. 0 steps recorded so far today. Walk to record steps!");
+      }
+    }, 800);
+  }
+
+  btnSyncFitNow?.addEventListener('click', syncGoogleFit);
+
+  btnFitToggleConnect?.addEventListener('click', () => {
+    if (state.isGoogleFitConnected) {
+      state.isGoogleFitConnected = false;
+      renderAll();
+      showToast("Google Fit disconnected.");
+    } else {
+      modalFitSetup.classList.remove('hidden');
+    }
+  });
+
+  btnLaunchFit?.addEventListener('click', () => {
+    showToast("Opening Google Fit Application...");
+    window.open('https://fit.google.com', '_blank');
+  });
+
+  // Setup Modal
+  btnOpenFitSetup?.addEventListener('click', () => modalFitSetup.classList.remove('hidden'));
+  btnCloseFitModal?.addEventListener('click', () => modalFitSetup.classList.add('hidden'));
+
+  btnModalGrantPerms?.addEventListener('click', () => {
+    state.isGoogleFitConnected = true;
+    modalFitSetup.classList.add('hidden');
+    renderAll();
+    showToast("✅ Health Connect permissions granted! Google Fit linked.");
+  });
+
+
+  // --- TASKS RENDERING ---
+  function renderHomeTasks() {
+    homeTaskList.innerHTML = '';
+    const slice = state.tasks.slice(0, 3);
+    slice.forEach(task => {
+      const item = createTaskItemElement(task);
+      homeTaskList.appendChild(item);
+    });
+  }
+
+  function renderFullTasks() {
+    tasksFullList.innerHTML = '';
+    const filtered = state.tasks.filter(t => {
+      if (currentFilter === 'all') return true;
+      return t.priority === currentFilter;
+    });
+
+    if (filtered.length === 0) {
+      tasksFullList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px;">No tasks found in this category.</p>`;
+      return;
+    }
+
+    filtered.forEach(task => {
+      const item = createTaskItemElement(task);
+      tasksFullList.appendChild(item);
+    });
+  }
+
+  function createTaskItemElement(task) {
+    const el = document.createElement('div');
+    el.className = `task-item ${task.completed ? 'completed' : ''}`;
+    
+    const pClass = task.priority.toLowerCase();
+    el.innerHTML = `
+      <div class="task-left">
+        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+        <div>
+          <span class="task-title">${task.title}</span>
+          <div class="task-meta">
+            <span class="p-badge ${pClass}">${task.priority}</span>
+            <span>⏱️ ${task.targetMins} min</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-tinted btn-sm btn-task-timer" title="Focus on this task">Start</button>
+    `;
+
+    const checkbox = el.querySelector('.task-checkbox');
+    checkbox.addEventListener('change', () => {
+      task.completed = checkbox.checked;
+      renderAll();
+      showToast(task.completed ? "Task marked completed! 🎉" : "Task restored to active.");
+    });
+
+    const startBtn = el.querySelector('.btn-task-timer');
+    startBtn.addEventListener('click', () => {
+      state.timer.taskTitle = task.title;
+      state.timer.totalSeconds = task.targetMins * 60;
+      state.timer.remainingSeconds = task.targetMins * 60;
+      timerActiveTaskTitle.textContent = task.title;
+      updateTimerDisplay();
+      switchTab('tab-timer');
+      startTimer();
+    });
+
+    return el;
+  }
+
+  filterChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      filterChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilter = chip.getAttribute('data-filter');
+      renderFullTasks();
+    });
+  });
+
+  // Add Task Modal
+  btnAddTaskModal?.addEventListener('click', () => modalAddTask.classList.remove('hidden'));
+  btnCloseTaskModal?.addEventListener('click', () => modalAddTask.classList.add('hidden'));
+
+  btnSubmitTask?.addEventListener('click', () => {
+    const titleInput = document.getElementById('new-task-title');
+    const prioInput = document.getElementById('new-task-priority');
+    const minsInput = document.getElementById('new-task-mins');
+
+    const title = titleInput.value.trim();
+    if (!title) {
+      alert("Please enter task title");
+      return;
+    }
+
+    const newTask = {
+      id: Date.now(),
+      title: title,
+      priority: prioInput.value,
+      targetMins: parseInt(minsInput.value, 10) || 30,
+      currentMins: 0,
+      completed: false,
+      category: 'Work'
+    };
+
+    state.tasks.unshift(newTask);
+    titleInput.value = '';
+    modalAddTask.classList.add('hidden');
+    renderAll();
+    showToast("New task created!");
+  });
+
+  // --- FOCUS TIMER ---
+  function updateTimerDisplay() {
+    const m = Math.floor(state.timer.remainingSeconds / 60);
+    const s = state.timer.remainingSeconds % 60;
+    timerCountdown.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+    const maxSec = state.timer.totalSeconds || 1;
+    const progress = (state.timer.remainingSeconds / maxSec);
+    const circumference = 534; // 2 * pi * 85
+    timerStroke.style.strokeDashoffset = circumference - (circumference * progress);
+  }
+
+  function startTimer() {
+    if (state.timer.isRunning) return;
+    state.timer.isRunning = true;
+    iconTimerPlay.classList.add('hidden');
+    iconTimerPause.classList.remove('hidden');
+
+    state.timer.intervalId = setInterval(() => {
+      if (state.timer.remainingSeconds > 0) {
+        state.timer.remainingSeconds--;
+        updateTimerDisplay();
+      } else {
+        pauseTimer();
+        state.focusMinutesCurrent += Math.round(state.timer.totalSeconds / 60);
+        renderAll();
+        showToast("Focus session completed! Great job! 🎉");
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    state.timer.isRunning = false;
+    clearInterval(state.timer.intervalId);
+    iconTimerPlay.classList.remove('hidden');
+    iconTimerPause.classList.add('hidden');
+  }
+
+  btnTimerToggle?.addEventListener('click', () => {
+    if (state.timer.isRunning) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+  });
+
+  btnTimerReset?.addEventListener('click', () => {
+    pauseTimer();
+    state.timer.remainingSeconds = state.timer.totalSeconds;
+    updateTimerDisplay();
+  });
+
+  btnTimerComplete?.addEventListener('click', () => {
+    pauseTimer();
+    const elapsed = state.timer.totalSeconds - state.timer.remainingSeconds;
+    const mins = Math.max(1, Math.round(elapsed / 60));
+    state.focusMinutesCurrent += mins;
+    state.timer.remainingSeconds = state.timer.totalSeconds;
+    updateTimerDisplay();
+    renderAll();
+    showToast(`Logged ${mins} minutes of deep focus!`);
+  });
+
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      presetBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      pauseTimer();
+      const mins = parseInt(btn.getAttribute('data-mins'), 10);
+      state.timer.totalSeconds = mins * 60;
+      state.timer.remainingSeconds = mins * 60;
+      updateTimerDisplay();
+    });
+  });
+
+  // --- FOOD & NUTRITION ---
+  function renderFoodEntries() {
+    const list = document.getElementById('food-entries-list');
+    const totalEl = document.getElementById('food-total-cals');
+    const donutFill = document.getElementById('food-donut-fill');
+    if (!list) return;
+
+    list.innerHTML = '';
+    if (state.foods.length === 0) {
+      list.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">No meals logged today yet.</p>`;
+    } else {
+      state.foods.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'food-card-item';
+        item.innerHTML = `
+          <div>
+            <span class="food-item-name">${f.name}</span>
+            <div style="font-size:11px; color:var(--text-secondary);">${f.time}</div>
+          </div>
+          <span class="food-item-cals">+${f.calories} kcal</span>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    if (totalEl) totalEl.innerHTML = `${Math.round(state.caloriesCurrent)} <span class="cal-unit">kcal</span>`;
+    if (donutFill) {
+      const pct = Math.min(1, state.caloriesCurrent / state.caloriesTarget);
+      const circ = 188.4;
+      donutFill.style.strokeDashoffset = circ - (circ * pct);
+    }
+  }
+
+  document.getElementById('btn-log-nl-food')?.addEventListener('click', () => {
+    const input = document.getElementById('nl-food-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Smart local food calorie estimator
+    let cals = 220;
+    if (text.toLowerCase().includes('egg')) cals += 140;
+    if (text.toLowerCase().includes('milk')) cals += 150;
+    if (text.toLowerCase().includes('roti') || text.toLowerCase().includes('rice')) cals += 200;
+    if (text.toLowerCase().includes('chicken') || text.toLowerCase().includes('paneer')) cals += 300;
+    if (text.toLowerCase().includes('banana') || text.toLowerCase().includes('apple')) cals += 100;
+
+    const entry = {
+      id: Date.now(),
+      name: text,
+      calories: cals,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    state.foods.unshift(entry);
+    state.caloriesCurrent += cals;
+    input.value = '';
+    renderAll();
+    showToast(`Logged "${text}" (+${cals} kcal)`);
+  });
+
+  // --- AI COMPANION CHAT ---
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+  const btnSendChat = document.getElementById('btn-send-chat');
+
+  function addChatMessage(role, text) {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${role}`;
+    bubble.innerHTML = `
+      ${role === 'ai' ? '<div class="ai-avatar">🤖</div>' : ''}
+      <div class="bubble-content">
+        <p>${text}</p>
+      </div>
+    `;
+    chatMessages.appendChild(bubble);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function sendChatMessage(userMsg) {
+    if (!userMsg) return;
+    addChatMessage('user', userMsg);
+    chatInput.value = '';
+
+    // Show typing loader
+    const loadingBubble = document.createElement('div');
+    loadingBubble.className = 'chat-bubble ai';
+    loadingBubble.id = 'ai-loading';
+    loadingBubble.innerHTML = `
+      <div class="ai-avatar">🤖</div>
+      <div class="bubble-content" style="padding:10px 14px;">
+        <span style="font-size:12px; color:var(--text-muted);">Thinking...</span>
+      </div>
+    `;
+    chatMessages.appendChild(loadingBubble);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    setTimeout(() => {
+      loadingBubble.remove();
+      let reply = "Main aapka schedule aur tasks monitor kar raha hu. Sab control me hai!";
+
+      const lower = userMsg.toLowerCase();
+      if (lower.includes('schedule') || lower.includes('day')) {
+        reply = `Aaj aapka score ${homeOverallPct.textContent} hai. Agle focus window me '${state.tasks[0]?.title || 'Deep Work'}' sabse critical task hai.`;
+      } else if (lower.includes('fit') || lower.includes('step')) {
+        reply = `Aapne abhi tak ${state.stepsCurrent.toLocaleString()} steps complete kiye hain. Google Fit sync status: ${state.isGoogleFitConnected ? 'Connected & Active 🟢' : 'Sensor Active ⚪'}. Daily 10,000 ka target achieve karne ke liye sham ko 30 min brisk walk recommend hai!`;
+      } else if (lower.includes('action') || lower.includes('next')) {
+        reply = `Aapka recommended next action '${state.tasks[0]?.title || 'Python Deep Work'}' hai. 45 min ka focus timer start karne ke liye 'Start Focus Timer' button dabayein!`;
+      } else {
+        reply = `Aapke message "${userMsg}" ko note kar liya hai. Life OS availability engine aapke schedule ko analyze karke updates plan kar raha hai. Kuch specific task ya diet log karni hai?`;
+      }
+
+      addChatMessage('ai', reply);
+    }, 800);
+  }
+
+  btnSendChat?.addEventListener('click', () => sendChatMessage(chatInput.value.trim()));
+  chatInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendChatMessage(chatInput.value.trim());
+  });
+
+  document.querySelectorAll('.prompt-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const p = chip.getAttribute('data-prompt');
+      sendChatMessage(p);
+    });
+  });
+
+  // AI Settings Modal
+  btnOpenAiSettings?.addEventListener('click', () => {
+    if (hfTokenInput) hfTokenInput.value = localStorage.getItem('lifeos_hf_token') || '';
+    modalAiSettings.classList.remove('hidden');
+  });
+
+  btnCloseAiModal?.addEventListener('click', () => modalAiSettings.classList.add('hidden'));
+
+  btnSaveAiConfig?.addEventListener('click', () => {
+    if (hfTokenInput) {
+      localStorage.setItem('lifeos_hf_token', hfTokenInput.value.trim());
+    }
+    modalAiSettings.classList.add('hidden');
+    showToast("AI configuration saved!");
+  });
+
+  // Initial render
+  updateTimerDisplay();
+  renderAll();
+});
