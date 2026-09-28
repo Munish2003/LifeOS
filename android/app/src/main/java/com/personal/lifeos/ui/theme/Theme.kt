@@ -2,26 +2,26 @@ package com.personal.lifeos.ui.theme
 
 import android.app.Activity
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val SkyBlueWhiteColorScheme = lightColorScheme(
+private val DarkFitColorScheme = darkColorScheme(
     primary = SkyBluePrimary,
-    onPrimary = PureWhite,
+    onPrimary = TextLight,
     primaryContainer = SkyBlueSurface,
-    onPrimaryContainer = SkyBluePrimary,
+    onPrimaryContainer = SkyBlueVibrant,
     secondary = CyanAccent,
-    onSecondary = PureWhite,
+    onSecondary = TextLight,
     tertiary = EmeraldSuccess,
     background = SkyBackground,
     onBackground = TextDarkPrimary,
     surface = PureWhite,
     onSurface = TextDarkPrimary,
-    surfaceVariant = SkyBlueSurface,
+    surfaceVariant = OffWhite,
     onSurfaceVariant = TextDarkSecondary,
     outline = CardBorderLight
 )
@@ -30,7 +30,7 @@ private val SkyBlueWhiteColorScheme = lightColorScheme(
 fun LifeOSTheme(
     content: @Composable () -> Unit
 ) {
-    val colorScheme = SkyBlueWhiteColorScheme
+    val colorScheme = DarkFitColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -38,8 +38,8 @@ fun LifeOSTheme(
             window.statusBarColor = SkyBackground.toArgb()
             window.navigationBarColor = PureWhite.toArgb()
             val insetsController = WindowCompat.getInsetsController(window, view)
-            insetsController.isAppearanceLightStatusBars = true
-            insetsController.isAppearanceLightNavigationBars = true
+            insetsController.isAppearanceLightStatusBars = false
+            insetsController.isAppearanceLightNavigationBars = false
         }
     }
 

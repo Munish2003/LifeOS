@@ -28,6 +28,23 @@ import com.personal.lifeos.ui.theme.LifeOSTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Production runtime permission request for notifications & activity recognition
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(
+                arrayOf(
+                    android.Manifest.permission.POST_NOTIFICATIONS,
+                    android.Manifest.permission.ACTIVITY_RECOGNITION
+                ),
+                101
+            )
+        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.ACTIVITY_RECOGNITION),
+                101
+            )
+        }
+
         setContent {
             LifeOSTheme {
                 MainAppNavigation()

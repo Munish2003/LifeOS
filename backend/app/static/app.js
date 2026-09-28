@@ -1,4 +1,4 @@
-// Life OS Mobile Simulator — Client Logic
+// Life OS Mobile Simulator — Dark Edition Client Logic
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- STATE ---
@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnFullMode = document.getElementById('btn-full-mode');
   const phoneFrame = document.getElementById('phone-frame');
 
+  // Notification Banner
+  const notifBanner = document.getElementById('notif-banner');
+  const btnEnableNotif = document.getElementById('btn-enable-notif');
+  const btnDismissNotif = document.getElementById('btn-dismiss-notif');
+
   // Home Dashboard
   const homeOverallPct = document.getElementById('home-overall-pct');
   const homeAuraPct = document.getElementById('home-aura-pct');
@@ -48,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const homeTaskList = document.getElementById('home-task-list');
   const fitSyncIndicator = document.getElementById('fit-sync-indicator');
   const headerFitBadge = document.getElementById('header-fit-badge');
+  const hourlyBarsContainer = document.getElementById('hourly-bars-container');
 
   // Google Fit & Health
   const fitStatusLabel = document.getElementById('fit-status-label');
@@ -61,9 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const healthCalories = document.getElementById('health-calories');
   const healthActiveTime = document.getElementById('health-active-time');
   const stepsCardBadge = document.getElementById('steps-card-badge');
-  const btnAddWalkSteps = document.getElementById('btn-add-walk-steps');
-  const btnSimulateFitSync = document.getElementById('btn-simulate-fit-sync');
   const btnOpenFitSetup = document.getElementById('btn-open-fit-setup');
+  const weeklyTrendBars = document.getElementById('weekly-trend-bars');
 
   // Tasks Tab
   const tasksFullList = document.getElementById('tasks-full-list');
@@ -85,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalFitSetup = document.getElementById('modal-fit-setup');
   const btnCloseFitModal = document.getElementById('btn-close-fit-modal');
   const btnModalGrantPerms = document.getElementById('btn-modal-grant-perms');
-  const btnModalTestSteps = document.getElementById('btn-modal-test-steps');
 
   const modalAddTask = document.getElementById('modal-add-task');
   const btnAddTaskModal = document.getElementById('btn-add-task-modal');
@@ -110,6 +114,27 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateClock, 1000);
   updateClock();
 
+  // --- NOTIFICATION PERMISSION HANDLER ---
+  btnEnableNotif?.addEventListener('click', () => {
+    if ('Notification' in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          showToast("🔔 Notifications enabled! Focus alerts active.");
+          notifBanner.classList.add('hidden');
+        } else {
+          showToast("Notifications permission denied or blocked in browser.");
+        }
+      });
+    } else {
+      showToast("🔔 Native notifications enabled for this session.");
+      notifBanner.classList.add('hidden');
+    }
+  });
+
+  btnDismissNotif?.addEventListener('click', () => {
+    notifBanner.classList.add('hidden');
+  });
+
   // --- NAVIGATION ---
   function switchTab(tabId) {
     tabs.forEach(t => t.classList.remove('active'));
@@ -121,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeNav = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
     if (activeNav) activeNav.classList.add('active');
 
-    // Scroll to top of app-screen
     document.getElementById('app-screen').scrollTop = 0;
   }
 
@@ -163,7 +187,102 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3000);
   }
 
-  // --- SCORE RECALCULATION ---
+  // --- 24-HOUR HOURLY ACTIVITY CHART (Noise / Google Fit Style) ---
+  function renderHourlyChart() {
+    if (!hourlyBarsContainer) return;
+    hourlyBarsContainer.innerHTML = '';
+    const currentHour = new Date().getHours();
+
+    for (let h = 0; h < 24; h++) {
+      const col = document.createElement('div');
+      col.className = 'hour-col';
+      col.title = `${String(h).padStart(2, '0')}:00`;
+
+      const bar = document.createElement('div');
+      bar.className = 'hour-bar';
+
+      // Height distribution based on real steps walked
+      let heightPct = 6;
+      if (state.stepsCurrent > 0) {
+        if (h === currentHour) {
+          heightPct = Math.min(95, Math.max(30, (state.stepsCurrent / state.stepsTarget) * 100));
+          bar.classList.add('active');
+        } else if (h >= 7 && h < currentHour) {
+          // Distributed past active hours
+          heightPct = Math.min(80, Math.max(15, (state.stepsCurrent / (currentHour - 6)) / 150));
+        }
+      } else {
+        if (h === currentHour) {
+          bar.classList.add('active');
+          heightPct = 12;
+        }
+      }
+
+      bar.style.height = `${heightPct}%`;
+      col.appendChild(bar);
+      hourlyBarsContainer.appendChild(col);
+    }
+  }
+
+  // --- 7-DAY WEEKLY TREND CHART ---
+  function renderWeeklyTrend() {
+    if (!weeklyTrendBars) return;
+    weeklyTrendBars.innerHTML = '';
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const todayIndex = (new Date().getDay() + 6) % 7; // Mon = 0
+
+    const wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.style.alignItems = 'flex-end';
+    wrap.style.height = '100px';
+    wrap.style.gap = '8px';
+    wrap.style.paddingTop = '8px';
+
+    days.forEach((day, idx) => {
+      const col = document.createElement('div');
+      col.style.flex = '1';
+      col.style.display = 'flex';
+      col.style.flexDirection = 'column';
+      col.style.alignItems = 'center';
+      col.style.gap = '6px';
+      col.style.height = '100%';
+      col.style.justifyContent = 'flex-end';
+
+      const bar = document.createElement('div');
+      bar.style.width = '100%';
+      bar.style.borderRadius = '6px 6px 0 0';
+      bar.style.transition = 'height 0.4s';
+
+      let pct = 8;
+      if (idx === todayIndex) {
+        pct = Math.min(100, Math.max(8, (state.stepsCurrent / state.stepsTarget) * 100));
+        bar.style.background = 'linear-gradient(180deg, #38BDF8 0%, #0EA5E9 100%)';
+        bar.style.boxShadow = '0 0 10px rgba(14, 165, 233, 0.4)';
+      } else if (idx < todayIndex) {
+        pct = 15; // Past unlogged days stay clean baseline
+        bar.style.background = 'rgba(255, 255, 255, 0.08)';
+      } else {
+        pct = 4; // Upcoming days
+        bar.style.background = 'rgba(255, 255, 255, 0.04)';
+      }
+
+      bar.style.height = `${pct}%`;
+
+      const lbl = document.createElement('span');
+      lbl.textContent = day;
+      lbl.style.fontSize = '10.5px';
+      lbl.style.fontWeight = idx === todayIndex ? '800' : '600';
+      lbl.style.color = idx === todayIndex ? '#38BDF8' : 'var(--text-muted)';
+
+      col.appendChild(bar);
+      col.appendChild(lbl);
+      wrap.appendChild(col);
+    });
+
+    weeklyTrendBars.appendChild(wrap);
+  }
+
+  // --- SCORE RECALCULATION & RENDER ---
   function renderAll() {
     // Steps Metrics
     const stepPct = Math.min(1, state.stepsCurrent / state.stepsTarget);
@@ -203,9 +322,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Google Fit Status Labels
     if (state.isGoogleFitConnected) {
       fitStatusLabel.textContent = "🟢 Connected & Syncing";
-      fitStatusLabel.style.color = "var(--success)";
+      fitStatusLabel.style.color = "var(--emerald-mint)";
       fitToggleBtnText.textContent = "Disconnect";
-      stepsCardBadge.textContent = "GOOGLE FIT + SENSOR ACTIVE";
+      stepsCardBadge.textContent = "GOOGLE FIT LIVE SYNC";
       fitSyncIndicator.textContent = "Google Fit Synced";
       headerFitBadge.textContent = "Google Fit Live";
     } else {
@@ -213,8 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
       fitStatusLabel.style.color = "var(--text-muted)";
       fitToggleBtnText.textContent = "Connect";
       stepsCardBadge.textContent = "HARDWARE PEDOMETER ACTIVE";
-      fitSyncIndicator.textContent = "Sensor Only";
-      headerFitBadge.textContent = "Pedometer Live";
+      fitSyncIndicator.textContent = "Sensors Active";
+      headerFitBadge.textContent = "Sensors Live";
     }
 
     // Health Tab Large Ring
@@ -225,7 +344,9 @@ document.addEventListener('DOMContentLoaded', () => {
     healthCalories.textContent = `${calBurned} kcal`;
     healthActiveTime.textContent = `${activeMins} min`;
 
-    // Render Task Lists
+    // Render Charts and Lists
+    renderHourlyChart();
+    renderWeeklyTrend();
     renderHomeTasks();
     renderFullTasks();
     renderFoodEntries();
@@ -258,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         showToast("Google Fit linked. 0 steps recorded so far today. Walk to record steps!");
       }
-    }, 800);
+    }, 700);
   }
 
   btnSyncFitNow?.addEventListener('click', syncGoogleFit);
@@ -274,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   btnLaunchFit?.addEventListener('click', () => {
-    showToast("Opening Google Fit Application...");
+    showToast("Opening Google Fit...");
     window.open('https://fit.google.com', '_blank');
   });
 
@@ -288,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAll();
     showToast("✅ Health Connect permissions granted! Google Fit linked.");
   });
-
 
   // --- TASKS RENDERING ---
   function renderHomeTasks() {
@@ -308,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (filtered.length === 0) {
-      tasksFullList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px;">No tasks found in this category.</p>`;
+      tasksFullList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:24px;">No tasks found in this category.</p>`;
       return;
     }
 
@@ -512,7 +632,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = input.value.trim();
     if (!text) return;
 
-    // Smart local food calorie estimator
     let cals = 220;
     if (text.toLowerCase().includes('egg')) cals += 140;
     if (text.toLowerCase().includes('milk')) cals += 150;
@@ -557,7 +676,6 @@ document.addEventListener('DOMContentLoaded', () => {
     addChatMessage('user', userMsg);
     chatInput.value = '';
 
-    // Show typing loader
     const loadingBubble = document.createElement('div');
     loadingBubble.className = 'chat-bubble ai';
     loadingBubble.id = 'ai-loading';
@@ -580,13 +698,13 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (lower.includes('fit') || lower.includes('step')) {
         reply = `Aapne abhi tak ${state.stepsCurrent.toLocaleString()} steps complete kiye hain. Google Fit sync status: ${state.isGoogleFitConnected ? 'Connected & Active 🟢' : 'Sensor Active ⚪'}. Daily 10,000 ka target achieve karne ke liye sham ko 30 min brisk walk recommend hai!`;
       } else if (lower.includes('action') || lower.includes('next')) {
-        reply = `Aapka recommended next action '${state.tasks[0]?.title || 'Python Deep Work'}' hai. 45 min ka focus timer start karne ke liye 'Start Focus Timer' button dabayein!`;
+        reply = `Aapka recommended next action '${state.tasks[0]?.title || 'Python Deep Work'}' hai. 45 min ka focus timer start karne ke liye 'Start Focus Chamber' button dabayein!`;
       } else {
         reply = `Aapke message "${userMsg}" ko note kar liya hai. Life OS availability engine aapke schedule ko analyze karke updates plan kar raha hai. Kuch specific task ya diet log karni hai?`;
       }
 
       addChatMessage('ai', reply);
-    }, 800);
+    }, 700);
   }
 
   btnSendChat?.addEventListener('click', () => sendChatMessage(chatInput.value.trim()));

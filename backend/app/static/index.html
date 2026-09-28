@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Life OS — Personal AI Operating System</title>
+  <title>Life OS — Premium AI Operating System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,17 +14,29 @@
   <header class="preview-toolbar">
     <div class="toolbar-brand">
       <span class="pulse-indicator"></span>
-      <span class="brand-title">Life OS Mobile Simulator</span>
-      <span class="brand-tag">Sky Blue & White Edition</span>
+      <span class="brand-title">Life OS</span>
+      <span class="brand-tag">Dark Edition • Noise & Fit Inspired</span>
     </div>
     <div class="toolbar-actions">
       <div class="device-toggle">
-        <button id="btn-phone-mode" class="toggle-btn active" title="Mobile Phone Mockup">📱 Phone Frame</button>
-        <button id="btn-full-mode" class="toggle-btn" title="Full Screen View">🖥️ Full Canvas</button>
+        <button id="btn-phone-mode" class="toggle-btn active" title="Mobile Phone Mockup">📱 Phone</button>
+        <button id="btn-full-mode" class="toggle-btn" title="Full Screen View">🖥️ Canvas</button>
       </div>
-      <a href="/docs" target="_blank" class="api-docs-link">FastAPI Docs ↗</a>
+      <a href="/docs" target="_blank" class="api-docs-link">API Docs ↗</a>
     </div>
   </header>
+
+  <!-- Notification Permission Banner (Noise App Style) -->
+  <div class="notification-banner" id="notif-banner">
+    <div class="notif-content">
+      <span style="font-size: 16px;">🔔</span>
+      <span><strong>Enable Notifications:</strong> Get real-time nudges for your focus windows & Google Fit milestones.</span>
+    </div>
+    <div>
+      <button class="notif-btn" id="btn-enable-notif">Enable Now</button>
+      <button class="notif-dismiss" id="btn-dismiss-notif">&times;</button>
+    </div>
+  </div>
 
   <!-- Device Frame Container -->
   <main class="device-wrapper">
@@ -35,7 +47,7 @@
         <div class="speaker-grill"></div>
       </div>
       <div class="phone-status-bar">
-        <span class="status-time" id="status-time">11:30</span>
+        <span class="status-time" id="status-time">14:15</span>
         <div class="status-icons">
           <svg class="status-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
           <svg class="status-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
@@ -51,12 +63,12 @@
           <!-- Top App Bar -->
           <div class="screen-header">
             <div>
-              <p class="greeting-sub" id="greeting-text">Good morning, Munish</p>
+              <p class="greeting-sub" id="greeting-text">Good afternoon, Munish</p>
               <h1 class="screen-title">Life OS Today</h1>
             </div>
             <div class="header-action-badge">
               <span class="live-dot"></span>
-              <span id="header-fit-badge">Pedometer Live</span>
+              <span id="header-fit-badge">Sensors Live</span>
             </div>
           </div>
 
@@ -91,12 +103,30 @@
               <span class="time-est-badge" id="action-rem-mins">45 min</span>
             </div>
             <h2 class="action-task-title" id="action-task-title">Python Deep Work</h2>
-            <p class="action-reason" id="action-task-reason">Optimal focus window available right now before scheduled evening dinner.</p>
+            <p class="action-reason" id="action-task-reason">High priority task matching your afternoon focus window before scheduled evening walk.</p>
             <div class="action-btn-row">
               <button class="btn btn-primary" id="btn-start-next-timer">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-                <span>Start Focus Timer</span>
+                <span>Start Focus Chamber</span>
               </button>
+            </div>
+          </div>
+
+          <!-- 24-HOUR HOURLY ACTIVITY CHART (Noise / Google Fit Style) -->
+          <div class="card activity-chart-card">
+            <div class="chart-header">
+              <span class="section-label">HOURLY ACTIVITY DISTRIBUTION</span>
+              <span class="chart-legend" id="chart-total-label">Today's Timeline</span>
+            </div>
+            <div class="hourly-chart-bars" id="hourly-bars-container">
+              <!-- 24 hourly bars dynamically populated -->
+            </div>
+            <div class="chart-x-axis">
+              <span>00:00</span>
+              <span>06:00</span>
+              <span>12:00</span>
+              <span>18:00</span>
+              <span>23:59</span>
             </div>
           </div>
 
@@ -138,6 +168,40 @@
               </div>
               <div class="progress-bar-bg">
                 <div class="progress-bar-fill bg-amber-gradient" id="home-calories-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 24-HOUR ROUTINE AVAILABILITY TIMELINE DIAGRAM -->
+          <div class="card routine-diagram-card">
+            <div class="chart-header">
+              <span class="section-label">ROUTINE & AVAILABILITY TIMELINE</span>
+              <span class="badge-status">Engine Active</span>
+            </div>
+            <div class="timeline-diagram-container">
+              <div class="timeline-block">
+                <span class="tb-time">09:00 - 13:00</span>
+                <span class="tb-dot"></span>
+                <div class="tb-info">
+                  <span class="tb-title">Office Deep Work</span>
+                  <span class="tb-type">Fixed Commitment (4h)</span>
+                </div>
+              </div>
+              <div class="timeline-block current">
+                <span class="tb-time">14:00 - 16:30</span>
+                <span class="tb-dot"></span>
+                <div class="tb-info">
+                  <span class="tb-title">🔥 Available Focus Window</span>
+                  <span class="tb-type">High Productivity Period (2h 30m)</span>
+                </div>
+              </div>
+              <div class="timeline-block">
+                <span class="tb-time">18:30 - 19:30</span>
+                <span class="tb-dot"></span>
+                <div class="tb-info">
+                  <span class="tb-title">Evening Walk & Steps</span>
+                  <span class="tb-type">Health & Exercise Block (1h)</span>
+                </div>
               </div>
             </div>
           </div>
@@ -236,7 +300,7 @@
           <div class="card google-fit-card">
             <div class="fit-card-header">
               <div class="fit-logo-box">
-                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="#0284C7" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
+                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="#38BDF8" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
               </div>
               <div class="fit-header-texts">
                 <span class="fit-brand-name">Google Fit Integration</span>
@@ -248,23 +312,23 @@
             </div>
 
             <p class="fit-card-description" id="fit-desc-text">
-              Directly synchronized with Google Fit & Android Health Connect. Live steps, distance, and burned calories reflect here automatically.
+              Direct synchronization with Google Fit & Android Health Connect. Live steps, distance, and burned calories reflect here with zero fake data.
             </p>
 
             <div class="fit-action-row">
               <button class="btn btn-primary" id="btn-sync-fit-now">
                 <svg class="sync-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                <span id="sync-fit-btn-text">Sync Now (Google Fit)</span>
+                <span id="sync-fit-btn-text">Sync Actual Steps</span>
               </button>
               <button class="btn btn-outline" id="btn-fit-toggle-connect">
-                <span id="fit-toggle-btn-text">Connected</span>
+                <span id="fit-toggle-btn-text">Disconnect</span>
               </button>
             </div>
           </div>
 
           <!-- Steps Aura Ring Card -->
           <div class="card steps-ring-card">
-            <span class="card-kicker" id="steps-card-badge">GOOGLE FIT + SENSOR ACTIVE</span>
+            <span class="card-kicker" id="steps-card-badge">GOOGLE FIT LIVE SYNC</span>
             
             <div class="aura-container large-aura">
               <div class="rotating-aura-halo"></div>
@@ -298,7 +362,18 @@
 
             <div class="sync-status-banner">
               <span class="banner-icon">📡</span>
-              <span class="banner-text" id="sync-banner-text">Tracking actual steps from Google Fit and phone hardware sensor.</span>
+              <span class="banner-text" id="sync-banner-text">Live physical sensors active. Actual steps update whenever you walk with your phone or smartwatch.</span>
+            </div>
+          </div>
+
+          <!-- 7-DAY WEEKLY ACTIVITY TREND CHART (Noise App Style) -->
+          <div class="card activity-chart-card">
+            <div class="chart-header">
+              <span class="section-label">7-DAY ACTIVITY TREND</span>
+              <span class="chart-legend">Goal: 10,000 / day</span>
+            </div>
+            <div class="weekly-trend-bars" id="weekly-trend-bars">
+              <!-- Rendered dynamically Mon-Sun -->
             </div>
           </div>
 
@@ -388,7 +463,7 @@
               <div class="chat-bubble ai">
                 <div class="ai-avatar">🤖</div>
                 <div class="bubble-content">
-                  <p>Namaste Munish! Main aapka Personal AI Life Coach hu. Aapka schedule, steps, priority tasks aur nutrition mere radar par hai. Aaj aap kya plan karna chahte hain?</p>
+                  <p>Namaste Munish! Life OS dark intelligence engine online. Aapke actual steps, priorities, focus time aur nutrition mere radar par hain. Aaj aap kis goal par focus karna chahte hain?</p>
                 </div>
               </div>
             </div>
@@ -412,7 +487,7 @@
 
       </div><!-- End app-screen -->
 
-      <!-- Bottom Navigation Bar (Sky Blue Active Icons) -->
+      <!-- Bottom Navigation Bar (Dark Neon Active Icons) -->
       <nav class="bottom-nav">
         <button class="nav-item active" data-tab="tab-home">
           <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -451,33 +526,33 @@
       <div class="modal-header">
         <div class="fit-modal-title">
           <div class="fit-modal-icon">🏃</div>
-          <h3>Google Fit & Health Connect</h3>
+          <h3 style="color:#FFFFFF;">Google Fit & Health Connect</h3>
         </div>
         <button class="modal-close-btn" id="btn-close-fit-modal">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="modal-subtitle">Connect Google Fit to automatically sync your daily steps, walking workouts, and active calories.</p>
+        <p class="modal-subtitle">Connect Google Fit to automatically sync your actual daily steps, walking workouts, and active calories without any fake data.</p>
         
         <div class="steps-guide-card">
           <div class="guide-step">
             <span class="step-num">1</span>
             <div>
-              <strong>Install Google Fit & Health Connect</strong>
+              <strong style="color:#FFFFFF;">Install Google Fit & Health Connect</strong>
               <p>Google Fit syncs via Android Health Connect on modern devices.</p>
             </div>
           </div>
           <div class="guide-step">
             <span class="step-num">2</span>
             <div>
-              <strong>Enable Health Connect in Google Fit</strong>
+              <strong style="color:#FFFFFF;">Enable Health Connect in Google Fit</strong>
               <p>In Google Fit &rarr; Profile &rarr; Settings &rarr; Turn ON <em>"Sync Fit with Health Connect"</em>.</p>
             </div>
           </div>
           <div class="guide-step">
             <span class="step-num">3</span>
             <div>
-              <strong>Grant Life OS Access</strong>
-              <p>Allow Life OS to read Steps & Activity data.</p>
+              <strong style="color:#FFFFFF;">Grant Life OS Access</strong>
+              <p>Allow Life OS to read actual physical Steps & Activity data.</p>
             </div>
           </div>
         </div>
@@ -493,7 +568,7 @@
   <div class="modal-backdrop hidden" id="modal-add-task">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h3>Create New Task</h3>
+        <h3 style="color:#FFFFFF;">Create New Task</h3>
         <button class="modal-close-btn" id="btn-close-task-modal">&times;</button>
       </div>
       <div class="modal-body">
@@ -522,7 +597,7 @@
   <div class="modal-backdrop hidden" id="modal-ai-settings">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h3>AI Companion Config</h3>
+        <h3 style="color:#FFFFFF;">AI Companion Config</h3>
         <button class="modal-close-btn" id="btn-close-ai-modal">&times;</button>
       </div>
       <div class="modal-body">
