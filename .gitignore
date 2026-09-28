@@ -1,0 +1,37 @@
+# Environment & Secrets
+.env
+backend/.env
+*.env.local
+
+# Keep templates
+!backend/.env.example
+
+# Android & Gradle
+.gradle/
+build/
+**/build/
+*.iml
+.idea/
+local.properties
+.cxx/
+captures/
+
+# IMPORTANT: Do NOT ignore Gradle Wrapper JAR
+!gradle/wrapper/gradle-wrapper.jar
+!android/gradle/wrapper/gradle-wrapper.jar
+
+# Python & Database
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+backend/lifeos.db
+.pytest_cache/
+venv/
+.venv/
+
+# Archives & Temporary files
+LifeOS_Mobile_Project.zip
+*.log

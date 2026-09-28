@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Life OS</string>
+    <string name="tagline">Personal AI Life Operating System</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_health">Health</string>
+    <string name="nav_goals">Goals</string>
+    <string name="nav_ai">AI Companion</string>
+</resources>
