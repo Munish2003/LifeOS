@@ -35,6 +35,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnPhoneMode = document.getElementById('btn-phone-mode');
   const btnFullMode = document.getElementById('btn-full-mode');
   const phoneFrame = document.getElementById('phone-frame');
+  const btnReplaySplash = document.getElementById('btn-replay-splash');
+
+  // Splash Screen Elements
+  const appSplashScreen = document.getElementById('app-splash-screen');
+  const splashLoaderBar = document.getElementById('splash-loader-bar');
+  const splashTelemetry = document.getElementById('splash-telemetry');
+
+  // Calendar Matrix Elements
+  const calPillBtns = document.querySelectorAll('.cal-pill-btn');
+  const calPanelDaily = document.getElementById('cal-panel-daily');
+  const calPanelWeekly = document.getElementById('cal-panel-weekly');
+  const calPanelMonthly = document.getElementById('cal-panel-monthly');
+  const ringStepsFill = document.getElementById('ring-steps-fill');
+  const ringFocusFill = document.getElementById('ring-focus-fill');
+  const ringDietFill = document.getElementById('ring-diet-fill');
+  const ringTasksFill = document.getElementById('ring-tasks-fill');
+  const habitStepsStatus = document.getElementById('habit-steps-status');
+  const habitFocusStatus = document.getElementById('habit-focus-status');
+  const habitDietStatus = document.getElementById('habit-diet-status');
+  const habitTasksStatus = document.getElementById('habit-tasks-status');
+  const weeklyDaysCircles = document.getElementById('weekly-days-circles');
+  const monthGridCircles = document.getElementById('month-grid-circles');
+  const btnPrevMonth = document.getElementById('btn-prev-month');
+  const btnNextMonth = document.getElementById('btn-next-month');
+  const calMonthTitle = document.getElementById('cal-month-title');
 
   // Notification Banner
   const notifBanner = document.getElementById('notif-banner');
@@ -103,6 +128,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const hfTokenInput = document.getElementById('hf-token-input');
 
   const toast = document.getElementById('toast');
+
+  // --- MODERN AESTHETIC SPLASH SCREEN INITIALIZATION ---
+  function triggerSplashScreen() {
+    if (!appSplashScreen) return;
+    appSplashScreen.classList.remove('fade-out');
+    if (splashLoaderBar) splashLoaderBar.style.width = '0%';
+    if (splashTelemetry) splashTelemetry.textContent = 'Initializing neural core...';
+
+    const steps = [
+      { pct: 30, text: 'Connecting Google Fit & physical sensors...' },
+      { pct: 65, text: 'Loading habits & consistency matrix...' },
+      { pct: 90, text: 'Calibrating priority queues...' },
+      { pct: 100, text: 'Life OS ready.' }
+    ];
+
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        const s = steps[currentStep];
+        if (splashLoaderBar) splashLoaderBar.style.width = `${s.pct}%`;
+        if (splashTelemetry) splashTelemetry.textContent = s.text;
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        setTimeout(() => {
+          appSplashScreen.classList.add('fade-out');
+        }, 320);
+      }
+    }, 250);
+  }
+
+  btnReplaySplash?.addEventListener('click', triggerSplashScreen);
 
   // --- TIME CLOCK ---
   function updateClock() {
@@ -344,9 +401,10 @@ document.addEventListener('DOMContentLoaded', () => {
     healthCalories.textContent = `${calBurned} kcal`;
     healthActiveTime.textContent = `${activeMins} min`;
 
-    // Render Charts and Lists
+    // Render Charts, Matrix and Lists
     renderHourlyChart();
     renderWeeklyTrend();
+    renderCalendarMatrix();
     renderHomeTasks();
     renderFullTasks();
     renderFoodEntries();
@@ -438,34 +496,200 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- CONSISTENCY & HABIT CALENDAR MATRIX (DONE / NOT-DONE CIRCLES) ---
+  let activeCalView = 'weekly';
+
+  calPillBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      calPillBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCalView = btn.getAttribute('data-cal-view');
+
+      calPanelDaily?.classList.toggle('hidden', activeCalView !== 'daily');
+      calPanelWeekly?.classList.toggle('hidden', activeCalView !== 'weekly');
+      calPanelMonthly?.classList.toggle('hidden', activeCalView !== 'monthly');
+
+      renderCalendarMatrix();
+    });
+  });
+
+  function renderCalendarMatrix() {
+    // 1. DAILY VIEW
+    const circumference = 150.8; // 2 * PI * 24
+
+    // Steps habit ring
+    const stepPct = Math.min(1, state.stepsCurrent / state.stepsTarget);
+    if (ringStepsFill) ringStepsFill.style.strokeDashoffset = circumference - (circumference * stepPct);
+    if (habitStepsStatus) habitStepsStatus.textContent = `${state.stepsCurrent.toLocaleString()} / 10k`;
+
+    // Focus habit ring
+    const focusPct = Math.min(1, state.focusMinutesCurrent / state.focusMinutesTarget);
+    if (ringFocusFill) ringFocusFill.style.strokeDashoffset = circumference - (circumference * focusPct);
+    if (habitFocusStatus) habitFocusStatus.textContent = `${state.focusMinutesCurrent} / 180m`;
+
+    // Diet habit ring
+    const dietPct = Math.min(1, state.caloriesCurrent / state.caloriesTarget);
+    if (ringDietFill) ringDietFill.style.strokeDashoffset = circumference - (circumference * dietPct);
+    if (habitDietStatus) habitDietStatus.textContent = `${Math.round(state.caloriesCurrent)} / 1,200`;
+
+    // Tasks habit ring
+    const completedTasks = state.tasks.filter(t => t.completed).length;
+    const taskPct = state.tasks.length > 0 ? (completedTasks / state.tasks.length) : 0;
+    if (ringTasksFill) ringTasksFill.style.strokeDashoffset = circumference - (circumference * taskPct);
+    if (habitTasksStatus) habitTasksStatus.textContent = `${completedTasks} / ${state.tasks.length} done`;
+
+    // 2. WEEKLY VIEW (7 Days Mon-Sun)
+    if (weeklyDaysCircles) {
+      weeklyDaysCircles.innerHTML = '';
+      const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+      const todayIdx = (new Date().getDay() + 6) % 7; // Mon = 0
+      const pastConsistency = [100, 100, 85, 100, 95, 75, 100];
+
+      days.forEach((day, idx) => {
+        const card = document.createElement('div');
+        card.className = `weekly-day-card ${idx === todayIdx ? 'today' : ''}`;
+
+        let circleHtml = '';
+        let pctText = '';
+
+        if (idx === todayIdx) {
+          const todayScore = Math.round((taskPct * 35) + (stepPct * 35) + (focusPct * 30));
+          circleHtml = `<div class="wd-circle today-circle">${todayScore}%</div>`;
+          pctText = 'Today';
+        } else if (idx < todayIdx) {
+          const p = pastConsistency[idx];
+          if (p >= 90) {
+            circleHtml = `<div class="wd-circle done">✓</div>`;
+            pctText = `${p}%`;
+          } else {
+            circleHtml = `<div class="wd-circle partial">◐</div>`;
+            pctText = `${p}%`;
+          }
+        } else {
+          circleHtml = `<div class="wd-circle rest">○</div>`;
+          pctText = 'Rest';
+        }
+
+        card.innerHTML = `
+          <span class="wd-lbl">${day}</span>
+          ${circleHtml}
+          <span class="wd-pct">${pctText}</span>
+        `;
+
+        card.addEventListener('click', () => {
+          if (idx === todayIdx) {
+            showToast("📅 Today: Active habits in progress! Complete tasks & steps to max out.");
+          } else if (idx < todayIdx) {
+            showToast(`📅 ${day}: Completed daily targets with ${pastConsistency[idx]}% Life Score!`);
+          } else {
+            showToast(`📅 ${day}: Upcoming scheduled routine window.`);
+          }
+        });
+
+        weeklyDaysCircles.appendChild(card);
+      });
+    }
+
+    // 3. MONTHLY VIEW (30 Days Grid for September 2026)
+    if (monthGridCircles) {
+      monthGridCircles.innerHTML = '';
+      const firstDayOffset = 1; // Tuesday
+      const totalDays = 30;
+      const currentDay = 28;
+
+      for (let i = 0; i < firstDayOffset; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'month-day-cell';
+        emptyCell.innerHTML = `<div class="month-circle empty"></div>`;
+        monthGridCircles.appendChild(emptyCell);
+      }
+
+      for (let d = 1; d <= totalDays; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'month-day-cell';
+
+        let statusClass = 'done';
+        let circleContent = `${d}`;
+
+        if (d === currentDay) {
+          statusClass = 'today';
+        } else if (d > currentDay) {
+          statusClass = 'rest';
+        } else {
+          if (d === 7 || d === 14) {
+            statusClass = 'rest';
+          } else if (d === 3 || d === 11 || d === 19 || d === 25) {
+            statusClass = 'partial';
+          } else {
+            statusClass = 'done';
+          }
+        }
+
+        cell.innerHTML = `<div class="month-circle ${statusClass}" title="${d} Sep">${circleContent}</div>`;
+
+        cell.addEventListener('click', () => {
+          if (d === currentDay) {
+            showToast(`📍 28 Sep (Today): Live tracking active. Steps: ${state.stepsCurrent.toLocaleString()}`);
+          } else if (d < currentDay) {
+            if (statusClass === 'done') {
+              showToast(`✓ ${d} Sep: Goal 100% Achieved! 10k+ steps, all focus blocks hit.`);
+            } else if (statusClass === 'partial') {
+              showToast(`◐ ${d} Sep: 78% Consistency. High focus, partial step goal.`);
+            } else {
+              showToast(`○ ${d} Sep: Scheduled Rest & Recovery Day.`);
+            }
+          } else {
+            showToast(`🗓️ ${d} Sep: Planned focus windows & routine block.`);
+          }
+        });
+
+        monthGridCircles.appendChild(cell);
+      }
+    }
+  }
+
+  btnPrevMonth?.addEventListener('click', () => showToast("Showing previous month: August 2026"));
+  btnNextMonth?.addEventListener('click', () => showToast("Showing next month: October 2026"));
+
+  // --- TASKS RENDERING WITH CUSTOM CHECKBOX ---
   function createTaskItemElement(task) {
     const el = document.createElement('div');
     el.className = `task-item ${task.completed ? 'completed' : ''}`;
     
     const pClass = task.priority.toLowerCase();
+    const catEmoji = task.category === 'Health' ? '🏃' : (task.category === 'Learning' ? '📚' : '💻');
+
     el.innerHTML = `
       <div class="task-left">
-        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
-        <div>
+        <div class="custom-checkbox ${task.completed ? 'checked' : ''}" role="checkbox" aria-checked="${task.completed}" title="${task.completed ? 'Mark incomplete' : 'Mark completed'}">
+          <svg viewBox="0 0 24 24" width="14" height="14"><path fill="#FFFFFF" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+        <div class="task-info">
           <span class="task-title">${task.title}</span>
           <div class="task-meta">
             <span class="p-badge ${pClass}">${task.priority}</span>
-            <span>⏱️ ${task.targetMins} min</span>
+            <span class="task-time-pill">⏱️ ${task.targetMins} min</span>
+            <span class="task-cat-pill">${catEmoji} ${task.category || 'General'}</span>
           </div>
         </div>
       </div>
-      <button class="btn btn-tinted btn-sm btn-task-timer" title="Focus on this task">Start</button>
+      <button class="btn-task-timer" title="Focus on this task">
+        <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+        <span>Focus</span>
+      </button>
     `;
 
-    const checkbox = el.querySelector('.task-checkbox');
-    checkbox.addEventListener('change', () => {
-      task.completed = checkbox.checked;
+    const checkbox = el.querySelector('.custom-checkbox');
+    checkbox.addEventListener('click', (e) => {
+      e.stopPropagation();
+      task.completed = !task.completed;
       renderAll();
       showToast(task.completed ? "Task marked completed! 🎉" : "Task restored to active.");
     });
 
     const startBtn = el.querySelector('.btn-task-timer');
-    startBtn.addEventListener('click', () => {
+    startBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       state.timer.taskTitle = task.title;
       state.timer.totalSeconds = task.targetMins * 60;
       state.timer.remainingSeconds = task.targetMins * 60;
@@ -738,4 +962,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial render
   updateTimerDisplay();
   renderAll();
+
+  // Modern aesthetic first-open splash screen
+  triggerSplashScreen();
 });

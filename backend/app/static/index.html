@@ -19,6 +19,7 @@
     </div>
     <div class="toolbar-actions">
       <div class="device-toggle">
+        <button id="btn-replay-splash" class="toggle-btn" title="Replay Splash Screen">✨ Intro</button>
         <button id="btn-phone-mode" class="toggle-btn active" title="Mobile Phone Mockup">📱 Phone</button>
         <button id="btn-full-mode" class="toggle-btn" title="Full Screen View">🖥️ Canvas</button>
       </div>
@@ -41,6 +42,38 @@
   <!-- Device Frame Container -->
   <main class="device-wrapper">
     <div class="phone-frame" id="phone-frame">
+      <!-- Modern Aesthetic Splash / First Open Screen -->
+      <div class="splash-screen" id="app-splash-screen">
+        <div class="splash-ambient-halo"></div>
+        <div class="splash-content">
+          <div class="splash-logo-container">
+            <div class="splash-logo-ring"></div>
+            <div class="splash-logo-inner">
+              <svg viewBox="0 0 24 24" width="42" height="42">
+                <path fill="url(#splash-cyan-grad)" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                <defs>
+                  <linearGradient id="splash-cyan-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#38BDF8" />
+                    <stop offset="100%" stop-color="#0EA5E9" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+          <div class="splash-titles">
+            <h1 class="splash-brand-title">LIFE OS</h1>
+            <p class="splash-brand-sub">Neural Habit & Health Engine</p>
+          </div>
+          <div class="splash-loader-bar-wrap">
+            <div class="splash-loader-bar" id="splash-loader-bar"></div>
+          </div>
+          <div class="splash-telemetry" id="splash-telemetry">Initializing neural core...</div>
+        </div>
+        <div class="splash-footer">
+          <span>v2.4.0 • Zero Dummy Baseline • Hardware Encrypted</span>
+        </div>
+      </div>
+
       <!-- Phone Bezel & Hardware Elements -->
       <div class="phone-notch">
         <div class="camera-lens"></div>
@@ -206,6 +239,144 @@
             </div>
           </div>
 
+          <!-- WEEKLY, DAILY & MONTHLY HABIT CALENDAR (Done / Not-Done Activity Rings) -->
+          <div class="card calendar-matrix-card">
+            <div class="cal-card-header">
+              <div>
+                <span class="section-label">CONSISTENCY & HABIT MATRIX</span>
+                <h3 class="cal-card-title">Daily Activity Rings</h3>
+              </div>
+              <div class="cal-view-selector">
+                <button class="cal-pill-btn" data-cal-view="daily">Daily</button>
+                <button class="cal-pill-btn active" data-cal-view="weekly">Weekly</button>
+                <button class="cal-pill-btn" data-cal-view="monthly">Monthly</button>
+              </div>
+            </div>
+
+            <!-- VIEW 1: DAILY HABIT CIRCLES -->
+            <div class="cal-view-panel hidden" id="cal-panel-daily">
+              <div class="daily-hero-row">
+                <div class="daily-date-badge">
+                  <span class="dd-day" id="daily-day-label">Monday</span>
+                  <span class="dd-num" id="daily-num-label">Today</span>
+                </div>
+                <div class="daily-streak-pill">
+                  <span>🔥 6-Day Streak</span>
+                </div>
+              </div>
+              
+              <!-- 4 Activity Circles (Done / In Progress / Not Done) -->
+              <div class="daily-circles-grid">
+                <!-- Steps Circle -->
+                <div class="habit-circle-card" id="habit-circle-steps">
+                  <div class="circle-ring-wrap">
+                    <svg viewBox="0 0 60 60" class="ring-svg">
+                      <circle class="ring-track" cx="30" cy="30" r="24" />
+                      <circle class="ring-fill ring-cyan" id="ring-steps-fill" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8" />
+                    </svg>
+                    <div class="circle-inner-icon">👟</div>
+                  </div>
+                  <span class="circle-habit-name">10k Steps</span>
+                  <span class="circle-status-text" id="habit-steps-status">0 / 10k</span>
+                </div>
+
+                <!-- Deep Focus Circle -->
+                <div class="habit-circle-card" id="habit-circle-focus">
+                  <div class="circle-ring-wrap">
+                    <svg viewBox="0 0 60 60" class="ring-svg">
+                      <circle class="ring-track" cx="30" cy="30" r="24" />
+                      <circle class="ring-fill ring-purple" id="ring-focus-fill" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8" />
+                    </svg>
+                    <div class="circle-inner-icon">⚡</div>
+                  </div>
+                  <span class="circle-habit-name">3h Focus</span>
+                  <span class="circle-status-text" id="habit-focus-status">0 / 180m</span>
+                </div>
+
+                <!-- Diet / Fuel Circle -->
+                <div class="habit-circle-card" id="habit-circle-diet">
+                  <div class="circle-ring-wrap">
+                    <svg viewBox="0 0 60 60" class="ring-svg">
+                      <circle class="ring-track" cx="30" cy="30" r="24" />
+                      <circle class="ring-fill ring-amber" id="ring-diet-fill" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8" />
+                    </svg>
+                    <div class="circle-inner-icon">🥗</div>
+                  </div>
+                  <span class="circle-habit-name">Clean Fuel</span>
+                  <span class="circle-status-text" id="habit-diet-status">0 / 1,200</span>
+                </div>
+
+                <!-- Critical Tasks Circle -->
+                <div class="habit-circle-card" id="habit-circle-tasks">
+                  <div class="circle-ring-wrap">
+                    <svg viewBox="0 0 60 60" class="ring-svg">
+                      <circle class="ring-track" cx="30" cy="30" r="24" />
+                      <circle class="ring-fill ring-emerald" id="ring-tasks-fill" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8" />
+                    </svg>
+                    <div class="circle-inner-icon">🎯</div>
+                  </div>
+                  <span class="circle-habit-name">Priority Work</span>
+                  <span class="circle-status-text" id="habit-tasks-status">0 / 3 done</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW 2: 7-DAY WEEKLY STRIP WITH COMPLETION CIRCLES -->
+            <div class="cal-view-panel" id="cal-panel-weekly">
+              <div class="weekly-strip-header">
+                <span class="strip-kicker">THIS WEEK'S CONSISTENCY</span>
+                <span class="strip-adherence-badge">⚡ 86% Adherence</span>
+              </div>
+              <div class="weekly-days-row" id="weekly-days-circles">
+                <!-- Dynamically populated 7 days (Mon-Sun) with circle rings: Done (✓), Partial (%), Missed (-), Today -->
+              </div>
+              <div class="cal-legend-row">
+                <div class="legend-item"><span class="legend-circle done">✓</span> Done</div>
+                <div class="legend-item"><span class="legend-circle partial">◐</span> Partial</div>
+                <div class="legend-item"><span class="legend-circle rest">○</span> Rest</div>
+                <div class="legend-item"><span class="legend-circle today">●</span> Today</div>
+              </div>
+            </div>
+
+            <!-- VIEW 3: FULL MONTHLY CALENDAR WITH DONE/NOT-DONE CIRCLES -->
+            <div class="cal-view-panel hidden" id="cal-panel-monthly">
+              <div class="month-nav-row">
+                <button class="cal-nav-btn" id="btn-prev-month">&larr;</button>
+                <span class="month-title-label" id="cal-month-title">September 2026</span>
+                <button class="cal-nav-btn" id="btn-next-month">&rarr;</button>
+              </div>
+
+              <!-- Day of week header -->
+              <div class="month-weekdays-row">
+                <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+              </div>
+
+              <!-- Days grid with Done/Not-Done activity circles -->
+              <div class="month-grid" id="month-grid-circles">
+                <!-- Dynamically populated 30 days -->
+              </div>
+
+              <div class="month-summary-pills">
+                <div class="summary-pill">
+                  <span class="pill-number text-success">22</span>
+                  <span class="pill-label">Done</span>
+                </div>
+                <div class="summary-pill">
+                  <span class="pill-number text-warning">4</span>
+                  <span class="pill-label">Partial</span>
+                </div>
+                <div class="summary-pill">
+                  <span class="pill-number text-muted">2</span>
+                  <span class="pill-label">Rest</span>
+                </div>
+                <div class="summary-pill">
+                  <span class="pill-number text-accent">6d</span>
+                  <span class="pill-label">Streak</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Quick Priority Tasks -->
           <div class="section-heading">
             <span>TODAY'S CRITICAL TASKS</span>
@@ -229,10 +400,10 @@
           </div>
 
           <div class="task-filter-tabs">
-            <button class="filter-chip active" data-filter="all">All Tasks</button>
-            <button class="filter-chip" data-filter="P1">Critical (P1)</button>
-            <button class="filter-chip" data-filter="P2">High (P2)</button>
-            <button class="filter-chip" data-filter="P3">Normal (P3)</button>
+            <button class="filter-chip active" data-filter="all"><span class="chip-emoji">📋</span> All Tasks</button>
+            <button class="filter-chip" data-filter="P1"><span class="chip-emoji">🔥</span> Critical (P1)</button>
+            <button class="filter-chip" data-filter="P2"><span class="chip-emoji">⚡</span> High (P2)</button>
+            <button class="filter-chip" data-filter="P3"><span class="chip-emoji">📌</span> Normal (P3)</button>
           </div>
 
           <div class="task-list full-list" id="tasks-full-list">
