@@ -42,35 +42,74 @@
   <!-- Device Frame Container -->
   <main class="device-wrapper">
     <div class="phone-frame" id="phone-frame">
-      <!-- Modern Aesthetic Splash / First Open Screen -->
+      <!-- CRAZY MOTION DESIGN LOADING / LAUNCH SCREEN -->
       <div class="splash-screen" id="app-splash-screen">
+        <div class="motion-grid-backdrop"></div>
+        <div class="motion-scanline"></div>
         <div class="splash-ambient-halo"></div>
-        <div class="splash-content">
-          <div class="splash-logo-container">
-            <div class="splash-logo-ring"></div>
-            <div class="splash-logo-inner">
-              <svg viewBox="0 0 24 24" width="42" height="42">
-                <path fill="url(#splash-cyan-grad)" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                <defs>
-                  <linearGradient id="splash-cyan-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#38BDF8" />
-                    <stop offset="100%" stop-color="#0EA5E9" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
+
+        <!-- 3D Dual-Gyroscope Orbital Energy Rings -->
+        <div class="motion-gyro-stage">
+          <div class="gyro-ring gyro-outer"></div>
+          <div class="gyro-ring gyro-middle"></div>
+          <div class="gyro-ring gyro-inner"></div>
+          <div class="gyro-radar-sweep"></div>
+          <div class="gyro-core">
+            <svg viewBox="0 0 24 24" width="38" height="38" class="gyro-icon">
+              <path fill="url(#motion-cyan-grad)" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              <defs>
+                <linearGradient id="motion-cyan-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#00F2FE" />
+                  <stop offset="50%" stop-color="#38BDF8" />
+                  <stop offset="100%" stop-color="#0EA5E9" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="gyro-pulse-dot"></div>
           </div>
-          <div class="splash-titles">
-            <h1 class="splash-brand-title">LIFE OS</h1>
-            <p class="splash-brand-sub">Neural Habit & Health Engine</p>
+        </div>
+
+        <div class="splash-titles">
+          <div class="motion-badge-row">
+            <span class="motion-chip">NEURAL OS v2.4</span>
+            <span class="motion-chip-live">LIVE TELEMETRY</span>
           </div>
+          <h1 class="splash-brand-title">LIFE OS</h1>
+          <p class="splash-brand-sub">Autonomous Human Performance Engine</p>
+        </div>
+
+        <!-- Kinetic Cyberpunk Telemetry Feed -->
+        <div class="motion-telemetry-feed" id="motion-telemetry-feed">
+          <div class="telemetry-row">
+            <span class="tel-tag">[CORE]</span>
+            <span class="tel-msg" id="splash-telemetry">Initializing neural core & local DB...</span>
+          </div>
+          <div class="telemetry-row tel-dim">
+            <span class="tel-tag">[HARDWARE]</span>
+            <span class="tel-msg" id="splash-sub-telemetry">Sensors active: Google Fit & Health Connect</span>
+          </div>
+        </div>
+
+        <!-- Animated Progress Meter & Frequency Equalizer -->
+        <div class="motion-progress-section">
           <div class="splash-loader-bar-wrap">
             <div class="splash-loader-bar" id="splash-loader-bar"></div>
           </div>
-          <div class="splash-telemetry" id="splash-telemetry">Initializing neural core...</div>
+          <div class="motion-meta-row">
+            <span class="tel-pct" id="splash-pct-num">0%</span>
+            <!-- 8 Bouncing Audio/Kinetic Frequency Bars -->
+            <div class="motion-eq-bars">
+              <span class="eq-bar"></span><span class="eq-bar"></span>
+              <span class="eq-bar"></span><span class="eq-bar"></span>
+              <span class="eq-bar"></span><span class="eq-bar"></span>
+              <span class="eq-bar"></span><span class="eq-bar"></span>
+            </div>
+            <span class="tel-status">256-BIT ENCRYPTED</span>
+          </div>
         </div>
+
         <div class="splash-footer">
-          <span>v2.4.0 • Zero Dummy Baseline • Hardware Encrypted</span>
+          <span>ZERO DUMMY BASELINE • HARDWARE CONNECTED • PRIVACY SECURED</span>
         </div>
       </div>
 
@@ -430,7 +469,10 @@
               </svg>
               <div class="timer-display">
                 <span class="timer-digits" id="timer-countdown">25:00</span>
-                <span class="timer-task-label" id="timer-active-task-title">Python Deep Work</span>
+                <div class="timer-title-badge-btn" id="btn-edit-timer-title" title="Click to customize title & duration">
+                  <span class="timer-task-label" id="timer-active-task-title">Python Deep Work</span>
+                  <span class="timer-edit-icon">✏️</span>
+                </div>
               </div>
             </div>
 
@@ -450,7 +492,13 @@
             <div class="timer-presets">
               <button class="preset-btn active" data-mins="25">25m Pomodoro</button>
               <button class="preset-btn" data-mins="45">45m Deep Work</button>
-              <button class="preset-btn" data-mins="60">60m Power Sprint</button>
+              <button class="preset-btn" data-mins="60">60m Sprint</button>
+              <button class="preset-btn custom-preset-trigger" id="btn-open-custom-timer">⚙️ Custom</button>
+            </div>
+            <div class="timer-meta-bar" id="timer-meta-bar">
+              <span class="timer-meta-tag" id="timer-meta-tag">💻 Deep Work</span>
+              <span class="meta-dot">•</span>
+              <span class="timer-meta-sound" id="timer-meta-sound">🎧 Focus Chamber Active</span>
             </div>
           </div>
         </section>
@@ -491,8 +539,8 @@
                 <svg class="sync-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
                 <span id="sync-fit-btn-text">Sync Actual Steps</span>
               </button>
-              <button class="btn btn-outline" id="btn-fit-toggle-connect">
-                <span id="fit-toggle-btn-text">Disconnect</span>
+              <button class="btn btn-outline" id="btn-open-calibrate-steps" title="Calibrate exact Google Fit steps">
+                <span>⚡ Calibrate Steps</span>
               </button>
             </div>
           </div>
@@ -688,103 +736,388 @@
 
       <!-- Bottom Home Indicator Bar -->
       <div class="home-indicator"></div>
-    </div>
+
+      <!-- ================= ALL IN-PHONE MODALS (BOUND TO PHONE FRAME) ================= -->
+
+      <!-- 1. Google Fit Setup & Permissions Modal -->
+      <div class="modal-backdrop hidden" id="modal-fit-setup">
+        <div class="modal-dialog">
+          <div class="sheet-drag-handle"></div>
+          <div class="modal-header">
+            <div class="fit-modal-title">
+              <div class="fit-modal-icon">🏃</div>
+              <h3 style="color:#FFFFFF;">Google Fit & Health Connect</h3>
+            </div>
+            <button class="modal-close-btn" id="btn-close-fit-modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-subtitle">Direct synchronization with Android Health Connect. Live steps, active minutes, and calorie burn sync with 100% genuine data.</p>
+            
+            <div class="steps-guide-card">
+              <div class="guide-step">
+                <span class="step-num">1</span>
+                <div>
+                  <strong style="color:#FFFFFF;">Android Health Connect</strong>
+                  <p>Google Fit routes step telemetry via the Android Health Connect provider.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">2</span>
+                <div>
+                  <strong style="color:#FFFFFF;">Enable Fit Sync</strong>
+                  <p>In Google Fit &rarr; Settings &rarr; Turn ON <em>"Sync Fit with Health Connect"</em>.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">3</span>
+                <div>
+                  <strong style="color:#FFFFFF;">Real-time Telemetry</strong>
+                  <p>Physical accelerometer & GPS steps sync across Life OS instantly.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-actions-col">
+              <button class="btn btn-primary btn-block" id="btn-modal-grant-perms">Grant Health Permissions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Add Task Modal (Redesigned Form UI with Segmented Controls) -->
+      <div class="modal-backdrop hidden" id="modal-add-task">
+        <div class="modal-dialog">
+          <div class="sheet-drag-handle"></div>
+          <div class="modal-header">
+            <div class="modal-title-with-icon">
+              <span class="m-icon-pill">⚡</span>
+              <h3 style="color:#FFFFFF;">Create New Task</h3>
+            </div>
+            <button class="modal-close-btn" id="btn-close-task-modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label><span class="f-dot cyan"></span> Task Title</label>
+              <input type="text" id="new-task-title" class="modern-input" placeholder="e.g. Solve LeetCode DP Problems">
+            </div>
+
+            <div class="form-group">
+              <label><span class="f-dot amber"></span> Priority Level</label>
+              <div class="segmented-pill-group" id="task-priority-group">
+                <button type="button" class="pill-option-btn priority-p1" data-val="P1">🚨 P1 Critical</button>
+                <button type="button" class="pill-option-btn priority-p2 active" data-val="P2">⚡ P2 High</button>
+                <button type="button" class="pill-option-btn priority-p3" data-val="P3">☕ P3 Normal</button>
+              </div>
+              <input type="hidden" id="new-task-priority" value="P2">
+            </div>
+
+            <div class="form-group">
+              <label><span class="f-dot purple"></span> Target Duration</label>
+              <div class="quick-chips-row" id="task-duration-chips">
+                <button type="button" class="quick-chip" data-mins="15">15m</button>
+                <button type="button" class="quick-chip" data-mins="25">25m</button>
+                <button type="button" class="quick-chip active" data-mins="45">45m</button>
+                <button type="button" class="quick-chip" data-mins="60">60m</button>
+                <button type="button" class="quick-chip" data-mins="90">90m</button>
+              </div>
+              <div class="input-with-suffix" style="margin-top: 6px;">
+                <input type="number" id="new-task-mins" class="modern-input" value="45" min="5" max="300">
+                <span class="input-suffix">mins</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-block btn-lg" id="btn-submit-task">
+              <span>Create Task</span>
+              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Custom Focus Timer Studio Modal -->
+      <div class="modal-backdrop hidden" id="modal-custom-timer">
+        <div class="modal-dialog">
+          <div class="sheet-drag-handle"></div>
+          <div class="modal-header">
+            <div class="modal-title-with-icon">
+              <span class="m-icon-pill">⏱️</span>
+              <h3 style="color:#FFFFFF;">Custom Focus Chamber</h3>
+            </div>
+            <button class="modal-close-btn" id="btn-close-custom-timer">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label><span class="f-dot cyan"></span> Focus Session Title</label>
+              <input type="text" id="custom-timer-title-input" class="modern-input" value="Python Deep Work" placeholder="e.g. System Design Architecture">
+            </div>
+
+            <div class="form-group">
+              <label><span class="f-dot purple"></span> Focus Mode Tag</label>
+              <div class="segmented-pill-group" id="timer-tag-group">
+                <button type="button" class="pill-option-btn active" data-tag="Deep Work">💻 Deep Work</button>
+                <button type="button" class="pill-option-btn" data-tag="Study & Code">📚 Study</button>
+                <button type="button" class="pill-option-btn" data-tag="Fitness Walk">🏃 Cardio</button>
+                <button type="button" class="pill-option-btn" data-tag="Mindfulness">🧘 Zen</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label><span class="f-dot amber"></span> Session Duration</label>
+              <div class="quick-chips-row" id="custom-timer-duration-chips">
+                <button type="button" class="quick-chip" data-mins="10">10m</button>
+                <button type="button" class="quick-chip" data-mins="15">15m</button>
+                <button type="button" class="quick-chip" data-mins="25">25m</button>
+                <button type="button" class="quick-chip active" data-mins="45">45m</button>
+                <button type="button" class="quick-chip" data-mins="60">60m</button>
+                <button type="button" class="quick-chip" data-mins="90">90m</button>
+                <button type="button" class="quick-chip" data-mins="120">120m</button>
+              </div>
+              <div class="input-with-suffix" style="margin-top: 6px;">
+                <input type="number" id="custom-timer-mins-input" class="modern-input" value="45" min="1" max="240">
+                <span class="input-suffix">mins</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label><span class="f-dot emerald"></span> Link To Existing Task (Optional)</label>
+              <select id="custom-timer-task-select" class="modern-input">
+                <option value="">-- No Task Binding (Free Focus) --</option>
+              </select>
+            </div>
+
+            <button class="btn btn-primary btn-block btn-lg" id="btn-start-custom-timer">
+              <span>🚀 Launch Focus Chamber</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Quick Calibrate / Log Actual Steps Modal -->
+      <div class="modal-backdrop hidden" id="modal-calibrate-steps">
+        <div class="modal-dialog">
+          <div class="sheet-drag-handle"></div>
+          <div class="modal-header">
+            <div class="modal-title-with-icon">
+              <span class="m-icon-pill">👟</span>
+              <h3 style="color:#FFFFFF;">Calibrate Actual Steps</h3>
+            </div>
+            <button class="modal-close-btn" id="btn-close-calibrate-modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-subtitle">Enter your physical step count from Google Fit, smart watch, or phone pedometer. All rings, calorie burns, distance metrics, and 24h charts update instantly.</p>
+            
+            <div class="form-group">
+              <label><span class="f-dot cyan"></span> Current Physical Steps</label>
+              <div class="input-with-suffix">
+                <input type="number" id="calibrate-steps-input" class="modern-input" value="7420" min="0" max="80000" step="10">
+                <span class="input-suffix">steps</span>
+              </div>
+            </div>
+
+            <div class="quick-chips-row" id="calibrate-quick-presets">
+              <button type="button" class="quick-chip" data-steps="4000">4,000</button>
+              <button type="button" class="quick-chip" data-steps="7420">7,420</button>
+              <button type="button" class="quick-chip" data-steps="8850">8,850</button>
+              <button type="button" class="quick-chip active" data-steps="10480">10,480 (Goal)</button>
+              <button type="button" class="quick-chip" data-steps="12500">12,500</button>
+            </div>
+
+            <!-- Live Calculated Preview -->
+            <div class="calibrate-preview-grid">
+              <div class="c-preview-card">
+                <span class="c-lbl">EST. DISTANCE</span>
+                <span class="c-val" id="calib-preview-dist">5.56 km</span>
+              </div>
+              <div class="c-preview-card">
+                <span class="c-lbl">CALORIE BURN</span>
+                <span class="c-val" id="calib-preview-cals">296 kcal</span>
+              </div>
+              <div class="c-preview-card">
+                <span class="c-lbl">ACTIVE DURATION</span>
+                <span class="c-val" id="calib-preview-time">74 min</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-block btn-lg" id="btn-submit-calibrate-steps">
+              <span>⚡ Sync & Update All Analytics</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. AI Settings Modal -->
+      <div class="modal-backdrop hidden" id="modal-ai-settings">
+        <div class="modal-dialog">
+          <div class="sheet-drag-handle"></div>
+          <div class="modal-header">
+            <h3 style="color:#FFFFFF;">AI Companion Config</h3>
+            <button class="modal-close-btn" id="btn-close-ai-modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Hugging Face API Token</label>
+              <input type="password" id="hf-token-input" class="modern-input" placeholder="hf_... (Optional for cloud LLM)">
+              <small class="form-help">Enter your token to use Llama 3.2 directly. If left blank, the built-in life coach engine operates locally.</small>
+            </div>
+            <div class="form-group">
+              <label>Backend URL</label>
+              <input type="text" id="backend-url-input" class="modern-input" value="http://localhost:8000">
+            </div>
+            <button class="btn btn-primary btn-block" id="btn-save-ai-config">Save Settings</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Strava / Google Fit / Noise Style Day Detail Sheet -->
+      <div class="modal-backdrop hidden" id="modal-day-detail">
+        <div class="detail-sheet-dialog">
+          <!-- Sheet Drag Handle -->
+          <div class="sheet-drag-handle"></div>
+
+          <!-- Header with Back, Date Switcher & Share -->
+          <div class="detail-sheet-header">
+            <button class="sheet-back-btn" id="btn-close-day-detail" title="Back to Dashboard">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            </button>
+            <div class="sheet-header-title-box">
+              <div class="sheet-nav-date-row">
+                <button class="sheet-nav-arrow" id="btn-prev-day" title="Previous Day">◀</button>
+                <span class="sheet-header-date" id="sheet-date-title">Friday, 4 September 2026</span>
+                <button class="sheet-nav-arrow" id="btn-next-day" title="Next Day">▶</button>
+              </div>
+              <span class="sheet-badge-achievement" id="sheet-achievement-badge">🏆 100% GOAL CRUSHED</span>
+            </div>
+            <button class="sheet-share-btn" id="btn-share-day" title="Share Activity">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+            </button>
+          </div>
+
+          <div class="detail-sheet-body">
+            <!-- Hero: Concentric Triple Activity Rings (Apple / Whoop / Noise Style) -->
+            <div class="sheet-hero-card">
+              <div class="triple-rings-container">
+                <svg viewBox="0 0 160 160" class="triple-rings-svg">
+                  <!-- Outer Ring: Steps (Radius 66) -->
+                  <circle class="ring-bg" cx="80" cy="80" r="66" />
+                  <circle class="ring-fg ring-cyan-fg" id="sheet-ring-steps" cx="80" cy="80" r="66" stroke-dasharray="414.7" stroke-dashoffset="0" />
+                  
+                  <!-- Middle Ring: Calories (Radius 50) -->
+                  <circle class="ring-bg" cx="80" cy="80" r="50" />
+                  <circle class="ring-fg ring-amber-fg" id="sheet-ring-cals" cx="80" cy="80" r="50" stroke-dasharray="314.1" stroke-dashoffset="0" />
+                  
+                  <!-- Inner Ring: Focus (Radius 34) -->
+                  <circle class="ring-bg" cx="80" cy="80" r="34" />
+                  <circle class="ring-fg ring-purple-fg" id="sheet-ring-focus" cx="80" cy="80" r="34" stroke-dasharray="213.6" stroke-dashoffset="0" />
+                </svg>
+                <div class="rings-center-stat">
+                  <span class="rings-center-val" id="sheet-hero-score">100%</span>
+                  <span class="rings-center-lbl">LIFE SCORE</span>
+                </div>
+              </div>
+
+              <div class="rings-legend-col">
+                <div class="r-leg-row">
+                  <span class="r-leg-dot bg-cyan"></span>
+                  <div>
+                    <span class="r-leg-val" id="sheet-steps-text">10,480 steps</span>
+                    <span class="r-leg-sub">Google Fit Target Hit</span>
+                  </div>
+                </div>
+                <div class="r-leg-row">
+                  <span class="r-leg-dot bg-amber"></span>
+                  <div>
+                    <span class="r-leg-val" id="sheet-cals-text">420 kcal burn</span>
+                    <span class="r-leg-sub">Active Calorie Burn</span>
+                  </div>
+                </div>
+                <div class="r-leg-row">
+                  <span class="r-leg-dot bg-purple"></span>
+                  <div>
+                    <span class="r-leg-val" id="sheet-focus-text">3h 45m focus</span>
+                    <span class="r-leg-sub">Deep Focus Chamber</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4-Card Performance Matrix (Strava / Noise Style) -->
+            <div class="detail-metrics-grid">
+              <div class="d-metric-box">
+                <div class="d-metric-head">
+                  <span>👟 DISTANCE & PACE</span>
+                  <span class="d-val-accent text-cyan" id="sheet-dist-val">7.86 km</span>
+                </div>
+                <div class="d-metric-body">
+                  <span class="d-sub-val">Avg Pace: <strong>11'42" / km</strong></span>
+                  <span class="d-sub-val">Cadence: <strong>118 spm</strong></span>
+                </div>
+              </div>
+
+              <div class="d-metric-box">
+                <div class="d-metric-head">
+                  <span>💓 CARDIO & INTENSITY</span>
+                  <span class="d-val-accent text-emerald" id="sheet-heart-val">74 bpm avg</span>
+                </div>
+                <div class="d-metric-body">
+                  <span class="d-sub-val">Peak Heart Rate: <strong>128 bpm</strong></span>
+                  <span class="d-sub-val">Active Cardio Zone: <strong>42 min</strong></span>
+                </div>
+              </div>
+
+              <div class="d-metric-box">
+                <div class="d-metric-head">
+                  <span>⚡ COGNITIVE SPRINT</span>
+                  <span class="d-val-accent text-purple" id="sheet-sprints-val">4 Sessions</span>
+                </div>
+                <div class="d-metric-body">
+                  <span class="d-sub-val">Focus Time: <strong>225 mins</strong></span>
+                  <span class="d-sub-val">Distraction Rate: <strong>0%</strong></span>
+                </div>
+              </div>
+
+              <div class="d-metric-box">
+                <div class="d-metric-head">
+                  <span>🥗 DIET & FUEL BALANCE</span>
+                  <span class="d-val-accent text-amber" id="sheet-fuel-val">1,180 kcal</span>
+                </div>
+                <div class="d-metric-body">
+                  <span class="d-sub-val">Net Deficit: <strong>-960 kcal</strong></span>
+                  <span class="d-sub-val">Hydration: <strong>3.2 L</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 24H Hourly Step Density Bar Chart for this Day -->
+            <div class="sheet-chart-box">
+              <div class="chart-header">
+                <span class="section-label">HOURLY STEP DENSITY (GOOGLE FIT)</span>
+                <span class="chart-legend" id="sheet-chart-total">Total: 10,480</span>
+              </div>
+              <div class="sheet-hourly-bars" id="sheet-hourly-bars">
+                <!-- Dynamically populated 24 hourly bars for this day -->
+              </div>
+              <div class="chart-x-axis">
+                <span>00:00</span>
+                <span>06:00</span>
+                <span>12:00</span>
+                <span>18:00</span>
+                <span>23:59</span>
+              </div>
+            </div>
+
+            <!-- Activity Timeline for this Day (Strava / Noise Style) -->
+            <div class="sheet-timeline-box">
+              <span class="section-label">RECORDED SESSIONS & ACTIVITIES</span>
+              <div class="sheet-activity-list" id="sheet-activity-list">
+                <!-- Dynamic activities for the day -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- /phone-frame (MODALS SECURELY CONTAINED WITHIN MOBILE FRAME) -->
   </main>
-
-  <!-- Google Fit Setup & Permissions Modal -->
-  <div class="modal-backdrop hidden" id="modal-fit-setup">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <div class="fit-modal-title">
-          <div class="fit-modal-icon">🏃</div>
-          <h3 style="color:#FFFFFF;">Google Fit & Health Connect</h3>
-        </div>
-        <button class="modal-close-btn" id="btn-close-fit-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-subtitle">Connect Google Fit to automatically sync your actual daily steps, walking workouts, and active calories without any fake data.</p>
-        
-        <div class="steps-guide-card">
-          <div class="guide-step">
-            <span class="step-num">1</span>
-            <div>
-              <strong style="color:#FFFFFF;">Install Google Fit & Health Connect</strong>
-              <p>Google Fit syncs via Android Health Connect on modern devices.</p>
-            </div>
-          </div>
-          <div class="guide-step">
-            <span class="step-num">2</span>
-            <div>
-              <strong style="color:#FFFFFF;">Enable Health Connect in Google Fit</strong>
-              <p>In Google Fit &rarr; Profile &rarr; Settings &rarr; Turn ON <em>"Sync Fit with Health Connect"</em>.</p>
-            </div>
-          </div>
-          <div class="guide-step">
-            <span class="step-num">3</span>
-            <div>
-              <strong style="color:#FFFFFF;">Grant Life OS Access</strong>
-              <p>Allow Life OS to read actual physical Steps & Activity data.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-actions-col">
-          <button class="btn btn-primary" id="btn-modal-grant-perms">Grant Health Permissions</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add Task Modal -->
-  <div class="modal-backdrop hidden" id="modal-add-task">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h3 style="color:#FFFFFF;">Create New Task</h3>
-        <button class="modal-close-btn" id="btn-close-task-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Task Title</label>
-          <input type="text" id="new-task-title" class="modern-input" placeholder="e.g. Solve LeetCode DP Problems">
-        </div>
-        <div class="form-group">
-          <label>Priority</label>
-          <select id="new-task-priority" class="modern-input">
-            <option value="P1">P1 — Critical (High Urgency)</option>
-            <option value="P2" selected>P2 — High (Important)</option>
-            <option value="P3">P3 — Medium (Normal)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Estimated Minutes</label>
-          <input type="number" id="new-task-mins" class="modern-input" value="45" min="5" max="300">
-        </div>
-        <button class="btn btn-primary btn-block" id="btn-submit-task">Create Task</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- AI Settings Modal -->
-  <div class="modal-backdrop hidden" id="modal-ai-settings">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h3 style="color:#FFFFFF;">AI Companion Config</h3>
-        <button class="modal-close-btn" id="btn-close-ai-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Hugging Face API Token</label>
-          <input type="password" id="hf-token-input" class="modern-input" placeholder="hf_... (Optional for cloud LLM)">
-          <small class="form-help">Enter your token to use Llama 3.2 directly. If left blank, the built-in life coach engine operates locally.</small>
-        </div>
-        <div class="form-group">
-          <label>Backend URL</label>
-          <input type="text" id="backend-url-input" class="modern-input" value="http://localhost:8000">
-        </div>
-        <button class="btn btn-primary btn-block" id="btn-save-ai-config">Save Settings</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Toast Notification -->
   <div id="toast" class="toast hidden"></div>
